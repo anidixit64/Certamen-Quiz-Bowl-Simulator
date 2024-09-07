@@ -1,0 +1,5 @@
+backend/tossups.json_part_2.json filter=lfs diff=lfs merge=lfs -text
+backend/tossups.json_part_3.json filter=lfs diff=lfs merge=lfs -text
+backend/tossups.json_part_4.json filter=lfs diff=lfs merge=lfs -text
+backend/tossups.json_part_5.json filter=lfs diff=lfs merge=lfs -text
+backend/tossups.json_part_1.json filter=lfs diff=lfs merge=lfs -text
