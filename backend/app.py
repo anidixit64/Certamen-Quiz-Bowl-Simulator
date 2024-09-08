@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, send_from_directory
 import os
 import json
 import random
@@ -18,17 +18,15 @@ for filename in os.listdir(data_dir):
 def get_random_question():
     # Select a random question
     question = random.choice(questions)
-    return jsonify({"question": question['question_sanitized']})
+    return jsonify({"question": question['question_sanitized'], "answer": question['answer_sanitized']})
 
 @app.route('/')
 def serve_welcome():
-    # Serve the welcome page
-    return send_from_directory('../frontend', 'welcome.html')
+    return send_from_directory(app.static_folder, 'welcome.html')
 
 @app.route('/questions')
 def serve_questions():
-    # Serve the main question page when accessing /questions
-    return send_from_directory('../frontend', 'index.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

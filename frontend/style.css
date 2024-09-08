@@ -1,14 +1,14 @@
 /* Global Styles */
 body {
     margin: 0;
-    font-family: 'Merriweather', serif; /* Use Merriweather font for questions page */
-    background-color: #0a0f2c; /* Dark background for both screens */
+    font-family: 'Merriweather', serif;
+    background-color: #0a0f2c;
     color: beige;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    position: relative; /* Allow positioning of the back button */
+    position: relative;
 }
 
 /* Welcome Screen Styles */
@@ -17,7 +17,7 @@ body {
 }
 
 .title {
-    font-size: 6rem; /* Massive letters */
+    font-size: 6rem;
     font-weight: bold;
     margin: 0 0 20px;
 }
@@ -29,7 +29,7 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 5px;
-    color: #0a0f2c; /* Dark color for contrast */
+    color: #0a0f2c;
 }
 
 #start-btn:hover {
@@ -42,44 +42,37 @@ body {
     flex-direction: column;
     align-items: center;
     width: 90%;
-    max-width: 800px; /* Max width for larger screens */
-    position: relative; /* Allow positioning of child elements */
+    max-width: 800px;
+    position: relative;
+    margin-top: -125px;
 }
 
-/* Position the question box at the top of the screen */
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .question-box {
-    border: 5px solid beige; /* Beige square outline */
+    border: 5px solid beige;
     padding: 20px;
     width: 100%;
-    max-width: 800px; /* Max width for larger screens */
-    height: 40vh; /* Height to create a TV screen look */
+    max-width: 800px;
+    height: 55vh;
     display: flex;
-    justify-content: flex-start; /* Align items to start */
-    align-items: flex-start; /* Align items to start */
-    overflow: auto; /* Allow scrolling if content overflows */
-    position: absolute; /* Position the box absolutely within the container */
-    top: 0; /* Align at the top of the container */
-    left: 0;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: auto;
+    margin-top: 10px;
 }
 
-/* Monospaced font and fixed width for question text */
 #question-text {
-    font-family: 'Courier New', Courier, monospace; /* Use monospaced font */
-    text-align: left; /* Align text to the left */
+    font-family: 'Courier New', Courier, monospace;
+    text-align: left;
     font-size: 1rem;
     padding: 10px;
-    justify-content: flex-start;
     line-height: 1.5;
-    align-items: flex-start; /* Align items to start */
-    white-space: pre-wrap; /* Preserve spaces and line breaks */
-}
-
-/* Button Container Styles */
-.button-container {
-    margin-top: 50vh; /* Position the button container below the question box */
-    display: flex;
-    flex-direction: row; /* Stack buttons vertically */
-    gap: 10px; /* Space between buttons */
+    white-space: pre-wrap;
 }
 
 #pause-btn, #next-btn {
@@ -89,7 +82,7 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 5px;
-    color: #0a0f2c; /* Dark color for contrast */
+    color: #0a0f2c;
 }
 
 #pause-btn:hover, #next-btn:hover {
@@ -103,11 +96,11 @@ body {
     padding: 10px 20px;
     font-size: 1.2rem;
     background-color: beige;
-    border: navy;
+    border: none;
     cursor: pointer;
     border-radius: 5px;
-    color: #0a0f2c; /* Dark color for contrast */
-    z-index: 1; /* Ensure the button is above other content */
+    color: #0a0f2c;
+    z-index: 1;
 }
 
 #back-btn:hover {

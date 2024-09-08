@@ -6,93 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certamen Questions</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet"> <!-- Adding Merriweather font -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <button id="back-btn">Back</button>
     <div class="question-container">
-        <div class="question-box">
-            <p id="question-text">Loading question...</p>
-        </div>
         <div class="button-container">
             <button id="pause-btn">Pause</button>
             <button id="next-btn">Next Question</button>
         </div>
+        <div class="question-box">
+            <p id="question-text">Loading question...</p>
+        </div>
+        <div id="answer-container" style="margin-top: 10px; font-size: 1.2rem; display: none;">
+            <strong>Answer:</strong> <span id="answer-text"></span>
+        </div>
     </div>
-    <script>
-        let questionText = document.getElementById('question-text');
-        let pauseButton = document.getElementById('pause-btn');
-        let nextButton = document.getElementById('next-btn');
-
-        let words = [];
-        let interval; // Store the interval ID
-        let index = 0; // Track current index
-        let isPaused = false; // Track if the reading is paused
-        let isReading = false; // Track if the reading is ongoing
-
-        // Fetch a random question on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchQuestion();
-        });
-
-        // Fetch question function
-        function fetchQuestion() {
-            fetch('/api/question')
-                .then(response => response.json())
-                .then(data => {
-                    let question = data.question;
-                    question = question.replace(/\(\*\)/g, ''); // Remove (asterisk) symbols
-                    words = question.split(/(\s+)/); // Split the question into words, keeping spaces
-                    index = 0; // Reset index for new question
-                    questionText.innerHTML = ''; // Clear existing content
-                    clearInterval(interval); // Clear any existing intervals
-                    isReading = true; // Mark as reading
-                    displayWords(); // Start displaying words
-                })
-                .catch(error => console.error('Error fetching question:', error));
-        }
-
-        // Display words one by one
-        function displayWords() {
-            interval = setInterval(() => {
-                if (index < words.length) {
-                    questionText.innerHTML += words[index]; // Append the next word or space
-                    index++;
-                } else {
-                    clearInterval(interval); // Clear the interval when done
-                    isReading = false; // Mark reading as finished
-                }
-            }, 50); // Display a new word or space every 0.05 seconds
-        }
-
-        // Fetch a new question when the button is clicked
-        nextButton.addEventListener('click', () => {
-            clearInterval(interval); // Clear the interval if it's running
-            isReading = false; // Mark reading as finished
-            fetchQuestion(); // Fetch a new question
-        });
-
-        // Pause/Resume the reading when the button is clicked
-        pauseButton.addEventListener('click', () => {
-            if (isReading) {
-                if (isPaused) {
-                    // Resume reading
-                    isPaused = false;
-                    pauseButton.textContent = 'Pause';
-                    displayWords(); // Continue displaying words from where it left off
-                } else {
-                    // Pause reading
-                    clearInterval(interval); // Clear the interval to pause
-                    isPaused = true;
-                    pauseButton.textContent = 'Resume';
-                }
-            }
-        });
-
-        // Navigate back to the welcome page
-        document.getElementById('back-btn').addEventListener('click', () => {
-            window.location.href = '/';  // Navigate to the welcome page
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

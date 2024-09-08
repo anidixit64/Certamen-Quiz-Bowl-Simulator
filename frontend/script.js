@@ -2,67 +2,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const questionElement = document.getElementById('question-text');
     const nextButton = document.getElementById('next-btn');
     const pauseButton = document.getElementById('pause-btn');
+    const answerContainer = document.getElementById('answer-container');
+    const answerText = document.getElementById('answer-text');
+    const backBtn = document.getElementById('back-btn');
 
     let words = [];
     let interval;
+    let isPaused = false;
     let isReading = false;
-    let isPaused = false; // New variable to track pause state
-    let currentIndex = 0; // To keep track of the current word index
+    let currentIndex = 0;
+    let answerSanitized = ''; // Define answerSanitized
 
     fetchQuestion();
 
-    nextButton.addEventListener('click', fetchQuestion);
-    pauseButton.addEventListener('click', togglePause); // Add event listener for pause button
+    nextButton.addEventListener('click', () => {
+        clearInterval(interval);
+        isPaused = false; // Ensure pause is reset
+        pauseButton.textContent = 'Pause'; // Update pause button text
+        fetchQuestion();
+    });
+
+    pauseButton.addEventListener('click', togglePause);
+    backBtn.addEventListener('click', () => window.location.href = '/');
 
     function fetchQuestion() {
+        clearInterval(interval);
         fetch('/api/question')
             .then(response => response.json())
             .then(data => {
-                let question = data.question;
-                question = question.replace(/\(\*\)/g, ''); // Remove (asterisk) symbols
-                words = question.split(/(\s+)/); // Split the question into words, keeping spaces
-                currentIndex = 0; // Reset index for new question
-                displayWords(); // Start displaying words
+                let question = data.question.replace(/\(\*\)/g, '');
+                answerSanitized = data.answer; // Assign the answer from the response
+                words = question.split(/(\s+)/);
+                currentIndex = 0;
+                questionElement.innerHTML = '';
+                answerContainer.style.display = 'none';
+                displayWords();
             })
             .catch(error => console.error('Error fetching question:', error));
     }
 
     function displayWords() {
-        clearInterval(interval); // Clear any existing intervals
-        questionElement.innerHTML = ''; // Clear existing content
-
+        clearInterval(interval);
         interval = setInterval(() => {
-            if (!isPaused) {
-                if (currentIndex < words.length) {
-                    questionElement.innerHTML += words[currentIndex]; // Append the next word or space
-                    currentIndex++;
-                } else {
-                    clearInterval(interval); // Clear the interval when done
-                    isReading = false;
-                }
+            if (!isPaused && currentIndex < words.length) {
+                questionElement.innerHTML += words[currentIndex++];
+            } else {
+                clearInterval(interval);
+                isReading = false;
             }
-        }, 500); // Display a new word or space every 0.5 seconds
+        }, 50);
+        isReading = true; // Mark reading as in progress
     }
 
     function togglePause() {
-        if (isPaused) {
-            // Resume
-            isPaused = false;
-            pauseButton.textContent = 'Pause';
-        } else {
-            // Pause
-            isPaused = true;
-            pauseButton.textContent = 'Resume';
+        if (isReading) {
+            isPaused = !isPaused;
+            pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
+            if (!isPaused) displayWords(); // Resume displaying words
         }
     }
 
-    document.getElementById('next-btn').addEventListener('click', () => {
-        clearInterval(interval); // Clear the interval if it's running
-        isReading = false; // Mark reading as finished
-        fetchQuestion(); // Fetch a new question
-    });
-
-    document.getElementById('back-btn').addEventListener('click', () => {
-        window.location.href = '/';  // Navigate to the welcome page
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            event.preventDefault();
+            if (isReading) {
+                isPaused = !isPaused; // Toggle pause state
+                answerText.textContent = answerSanitized; // Update answer text
+                answerContainer.style.display = 'block'; // Show the answer
+            }
+        } else if (event.code === 'ArrowRight') {
+            event.preventDefault();
+            nextButton.click(); // Trigger the "Next Question" button click
+        }
     });
 });
