@@ -8,6 +8,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    position: relative; /* Allow positioning of the back button */
 }
 
 /* Welcome Screen Styles */
@@ -70,9 +71,27 @@ body {
     cursor: pointer;
     border-radius: 5px;
     color: #0a0f2c; /* Dark color for contrast */
-    position: relative; /* Positioning button relative to the container */
+    position: relative; /* Position button relative to the container */
 }
 
 #next-btn:hover {
+    background-color: #ddd;
+}
+
+#back-btn {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: beige;
+    border: navy;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #0a0f2c; /* Dark color for contrast */
+    z-index: 1; /* Ensure the button is above other content */
+}
+
+#back-btn:hover {
     background-color: #ddd;
 }

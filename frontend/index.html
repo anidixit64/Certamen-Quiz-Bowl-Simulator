@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet"> <!-- Adding Merriweather font -->
 </head>
 <body>
+    <button id="back-btn">Back</button>
     <div class="question-container">
         <div class="question-box">
             <p id="question-text">Loading question...</p>
@@ -33,6 +34,11 @@
 
         // Fetch a new question when the button is clicked
         document.getElementById('next-btn').addEventListener('click', fetchQuestion);
+
+        // Navigate back to the welcome page
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.location.href = '/';  // Navigate to the welcome page
+        });
     </script>
 </body>
 </html>
