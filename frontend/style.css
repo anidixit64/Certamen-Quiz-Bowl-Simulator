@@ -1,33 +1,78 @@
+/* Global Styles */
 body {
-    background-color: #001f3f; /* Deep blue background */
-    color: #f5f5dc; /* Beige text */
-    font-family: Arial, sans-serif;
     margin: 0;
+    font-family: 'Merriweather', serif; /* Use Merriweather font for questions page */
+    background-color: #0a0f2c; /* Dark background for both screens */
+    color: beige;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
-.welcome-container, .question-container {
+/* Welcome Screen Styles */
+.welcome-container {
     text-align: center;
-    background-color: #00264d; /* Slightly lighter blue for contrast */
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-button {
-    background-color: #f5f5dc; /* Beige button */
-    color: #001f3f; /* Deep blue text */
+.title {
+    font-size: 6rem; /* Massive letters */
+    font-weight: bold;
+    margin: 0 0 20px;
+}
+
+#start-btn {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    background-color: beige;
     border: none;
-    padding: 10px 20px;
-    margin-top: 20px;
     cursor: pointer;
     border-radius: 5px;
-    font-size: 16px;
+    color: #0a0f2c; /* Dark color for contrast */
 }
 
-button:hover {
-    background-color: #e0d7c6; /* Slightly darker beige on hover */
+#start-btn:hover {
+    background-color: #ddd;
+}
+
+/* Questions Page Styles */
+.question-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 800px; /* Max width for larger screens */
+}
+
+.question-box {
+    border: 5px solid beige; /* Beige square outline */
+    padding: 20px;
+    width: 100%;
+    height: 60vh; /* Height to create a TV screen look */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto; /* Scroll if the text is too long */
+}
+
+#question-text {
+    text-align: center;
+    font-size: 1.2rem;
+    line-height: 1.5;
+}
+
+#next-btn {
+    margin-top: 30px; /* Slight margin to place button just outside the question box */
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: beige;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #0a0f2c; /* Dark color for contrast */
+    position: relative; /* Positioning button relative to the container */
+}
+
+#next-btn:hover {
+    background-color: #ddd;
 }

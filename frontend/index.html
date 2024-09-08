@@ -4,16 +4,35 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Bowl Question</title>
+    <title>Certamen Questions</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet"> <!-- Adding Merriweather font -->
 </head>
 <body>
     <div class="question-container">
-        <h1>Quiz Bowl Question</h1>
-        <p id="question"></p>
+        <div class="question-box">
+            <p id="question-text">Loading question...</p>
+        </div>
         <button id="next-btn">Next Question</button>
     </div>
+    <script>
+        // Fetch a random question on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchQuestion();
+        });
 
-    <script src="script.js"></script>
+        // Fetch question function
+        function fetchQuestion() {
+            fetch('/api/question')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('question-text').innerText = data.question;
+                })
+                .catch(error => console.error('Error fetching question:', error));
+        }
+
+        // Fetch a new question when the button is clicked
+        document.getElementById('next-btn').addEventListener('click', fetchQuestion);
+    </script>
 </body>
 </html>
