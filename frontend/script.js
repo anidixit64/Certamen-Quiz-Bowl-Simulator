@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 questionElement.innerHTML = '';
                 answerInputContainer.style.display = 'none';
                 answerContainer.style.display = 'none';
+                answerInput.value = ''; // Reset the input field
                 displayWords();
             })
             .catch(error => console.error('Error fetching question:', error));
@@ -72,26 +73,66 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userAnswer === correctAnswer) {
             answerText.textContent = 'Correct!';
             answerText.style.color = 'green';
+            answerContainer.style.display = 'block'; // Show the correct message
+
+            // Hide the message and fetch the next question after 0.35 seconds
+            setTimeout(() => {
+                answerContainer.style.display = 'none'; // Hide the message
+                fetchQuestion(); // Fetch the next question
+            }, 350); // 350 milliseconds delay
         } else {
             answerText.textContent = 'Incorrect. Try again!';
             answerText.style.color = 'red';
+            answerInputContainer.style.display = 'none'; // Hide the input bar
+            answerInput.value = ''; // Reset the input field
+
+            // Show the incorrect message and then hide it after 0.35 seconds
+            answerContainer.style.display = 'block'; // Show the answer feedback
+            setTimeout(() => {
+                answerContainer.style.display = 'none'; // Hide the answer feedback
+                // Resume reading
+                isPaused = false;
+                pauseButton.textContent = 'Pause';
+                displayWords();
+            }, 350); // 350 milliseconds delay
         }
-        answerContainer.style.display = 'block';
     }
 
     document.addEventListener('keydown', (event) => {
         if (event.code === 'Space') {
             event.preventDefault();
+            // Show the input field and stop reading if the question is currently being read
             if (isReading) {
                 isPaused = true;
                 pauseButton.textContent = 'Resume';
                 answerInputContainer.style.display = 'block'; // Show input field
                 answerInput.focus(); // Focus on the input field
-                answerContainer.style.display = 'none'; // Hide answer container
+            } else {
+                // If the question is not being read, still show the input field
+                answerInputContainer.style.display = 'block'; // Show input field
+                answerInput.focus(); // Focus on the input field
             }
         } else if (event.code === 'ArrowRight') {
             event.preventDefault();
-            nextButton.click();
+            // Only trigger the next question functionality if the input field is not focused
+            if (document.activeElement !== answerInput) {
+                nextButton.click();
+            } else {
+                // Move cursor within the answer input field
+                const cursorPosition = answerInput.selectionStart;
+                answerInput.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+            }
+        } else if (event.code === 'Enter') {
+            // Only trigger checkAnswer if the input field is focused
+            if (document.activeElement === answerInput) {
+                event.preventDefault();
+                checkAnswer(); // Call the checkAnswer function when Enter is pressed
+            }
+        } else {
+            // Allow all other keyboard symbols in the input field
+            if (document.activeElement === answerInput) {
+                return;
+            }
         }
     });
 });

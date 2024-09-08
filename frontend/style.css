@@ -106,3 +106,47 @@ body {
 #back-btn:hover {
     background-color: #ddd;
 }
+
+/* User Input Styles */
+#answer-input-container {
+    display: none;
+    margin-top: 10px;
+    text-align: center;
+}
+
+#answer-input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 2px solid beige;
+    border-radius: 5px;
+    background-color: #0a0f2c;
+    color: beige;
+    width: 100%;
+    max-width: 400px;
+}
+
+#answer-input:focus {
+    outline: none;
+    border-color: #ddd;
+}
+
+#submit-answer-btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: beige;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #0a0f2c;
+    margin-top: 10px;
+}
+
+#submit-answer-btn:hover {
+    background-color: #ddd;
+}
+
+#answer-container {
+    margin-top: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+}
