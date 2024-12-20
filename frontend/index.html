@@ -14,7 +14,12 @@
         <div class="question-box">
             <p id="question-text">Loading question...</p>
         </div>
-        <button id="next-btn">Next Question</button>
+        <div id="next-btn-container">
+            <button id="next-btn">Next Question</button>
+        </div>
+        <div id="answer-container" style="display: none;">
+            <input type="text" id="answer-input" placeholder="Enter your guess..." />
+        </div>
     </div>
     <script>
         let intervalId; // Variable to store the interval for word display
@@ -22,6 +27,10 @@
         let index = 0; // To track the current word being displayed
         let words = []; // Array to hold the words of the current question
         const questionElement = document.getElementById('question-text'); // Reference to the question text element
+        const nextButton = document.getElementById('next-btn');
+        const nextBtnContainer = document.getElementById('next-btn-container');
+        const answerContainer = document.getElementById('answer-container');
+        const answerInput = document.getElementById('answer-input');
 
         // Fetch a random question on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -35,6 +44,11 @@
             isReading = true; // Reset to reading state
             index = 0; // Reset word index
             questionElement.innerHTML = ''; // Clear previous question content
+            answerContainer.style.display = 'none'; // Hide answer input field
+            nextBtnContainer.style.display = 'block'; // Show Next Question button
+
+            // Clear the answer input field
+            answerInput.value = ''; 
 
             fetch('/api/question')
                 .then(response => response.json())
@@ -60,12 +74,12 @@
         }
 
         // Fetch a new question when the "Next Question" button is clicked
-        document.getElementById('next-btn').addEventListener('click', fetchQuestion);
+        nextButton.addEventListener('click', fetchQuestion);
 
-        // Fetch a new question when the Enter key is pressed
+        // Fetch a new question when the Enter key is pressed (only when input field is hidden)
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                fetchQuestion(); // Move to next question
+            if (event.key === 'Enter' && answerContainer.style.display === 'none') {
+                fetchQuestion(); // Move to next question if answer input is hidden
             }
         });
 
@@ -74,10 +88,29 @@
             if (event.key === ' ') { // Spacebar pressed
                 if (isReading) {
                     clearInterval(intervalId); // Stop displaying words (pause)
+                    answerContainer.style.display = 'block'; // Show input field
+                    nextBtnContainer.style.display = 'none'; // Hide Next Question button
+                    answerInput.focus(); // Focus on the input field for user's guess
                 } else {
                     displayQuestionWordByWord(); // Resume displaying words from where it was paused
+                    answerContainer.style.display = 'none'; // Hide input field when resumed
+                    nextBtnContainer.style.display = 'block'; // Show Next Question button again
                 }
                 isReading = !isReading; // Toggle the reading state
+            }
+        });
+
+        // Handle when the user presses Enter to submit their guess
+        answerInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                // Optionally handle the user's answer here (e.g., compare with correct answer)
+                console.log('User guessed: ', answerInput.value);
+
+                // Resume question reading after submitting the answer (no new question)
+                isReading = true;
+                answerContainer.style.display = 'none'; // Hide input field
+                nextBtnContainer.style.display = 'block'; // Show Next Question button again
+                displayQuestionWordByWord(); // Resume reading the question from where it stopped
             }
         });
 
@@ -86,5 +119,37 @@
             window.location.href = '/';  // Navigate to the welcome page
         });
     </script>
+
+    <style>
+        /* Styling for answer input field to match "Next Question" button */
+        #answer-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        /* Adjust answer input field margin to move it further down the page */
+        #answer-container {
+            margin-top: 50px; /* Move it further down */
+        }
+
+        #next-btn {
+            padding: 10px;
+            font-size: 1rem;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            border: none;
+        }
+
+        #next-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
 </body>
 </html>

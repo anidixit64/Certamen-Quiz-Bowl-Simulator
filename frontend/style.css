@@ -11,6 +11,12 @@ body {
     position: relative; /* Allow positioning of the back button */
 }
 
+#start-btn:focus,
+#next-btn:focus,
+#back-btn:focus {
+    outline: 3px solid #ffd700; /* Gold outline for focus visibility */
+}
+
 /* Welcome Screen Styles */
 .welcome-container {
     text-align: center;
@@ -20,12 +26,13 @@ body {
     font-size: 6rem; /* Massive letters */
     font-weight: bold;
     margin: 0 0 20px;
+    color: #ffd700; /* Golden color for better visibility */
 }
 
 #start-btn {
     padding: 15px 30px;
     font-size: 1.5rem;
-    background-color: beige;
+    background-color: #ffd700; /* Gold color for buttons */
     border: none;
     cursor: pointer;
     border-radius: 5px;
@@ -33,7 +40,12 @@ body {
 }
 
 #start-btn:hover {
-    background-color: #ddd;
+    background-color: #ffcc00; /* Lighter gold on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+#start-btn:focus {
+    outline: 3px solid #ffd700;
 }
 
 /* Questions Page Styles */
@@ -54,6 +66,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow: auto; /* Scroll if the text is too long */
+    box-sizing: border-box; /* Ensure padding is considered in the box size */
 }
 
 #question-text {
@@ -66,7 +79,7 @@ body {
     margin-top: 30px; /* Slight margin to place button just outside the question box */
     padding: 10px 20px;
     font-size: 1.2rem;
-    background-color: beige;
+    background-color: #ffd700; /* Gold color for buttons */
     border: none;
     cursor: pointer;
     border-radius: 5px;
@@ -75,7 +88,12 @@ body {
 }
 
 #next-btn:hover {
-    background-color: #ddd;
+    background-color: #ffcc00; /* Lighter gold on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+#next-btn:focus {
+    outline: 3px solid #ffd700;
 }
 
 #back-btn {
@@ -94,4 +112,48 @@ body {
 
 #back-btn:hover {
     background-color: #ddd;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+#back-btn:focus {
+    outline: 3px solid #ffd700;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .title {
+        font-size: 4rem; /* Smaller title on smaller screens */
+    }
+
+    .question-box {
+        height: 50vh; /* Reduce height for better fit */
+    }
+
+    #start-btn, #next-btn, #back-btn {
+        font-size: 1rem; /* Adjust button font size for mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 3rem; /* Smaller title for mobile */
+    }
+
+    #start-btn {
+        padding: 12px 24px;
+        font-size: 1.2rem;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
