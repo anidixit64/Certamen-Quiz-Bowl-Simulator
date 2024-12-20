@@ -76,43 +76,38 @@
         // Fetch a new question when the "Next Question" button is clicked
         nextButton.addEventListener('click', fetchQuestion);
 
-        // Fetch a new question when the Enter key is pressed (only when input field is hidden)
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && answerContainer.style.display === 'none') {
-                fetchQuestion(); // Move to next question if answer input is hidden
-            }
-        });
-
-        // Toggle the reading state when the spacebar is pressed
         document.addEventListener('keydown', (event) => {
             if (event.key === ' ') { // Spacebar pressed
                 if (isReading) {
-                    clearInterval(intervalId); // Stop displaying words (pause)
+                    // Pause the question and show input field for the answer
+                    clearInterval(intervalId); // Stop the word-by-word display
                     answerContainer.style.display = 'block'; // Show input field
                     nextBtnContainer.style.display = 'none'; // Hide Next Question button
-                    answerInput.focus(); // Focus on the input field for user's guess
-                } else {
-                    displayQuestionWordByWord(); // Resume displaying words from where it was paused
-                    answerContainer.style.display = 'none'; // Hide input field when resumed
-                    nextBtnContainer.style.display = 'block'; // Show Next Question button again
+                    answerInput.focus(); // Focus on the input field
+                    isReading = false; // Set to paused state
                 }
-                isReading = !isReading; // Toggle the reading state
+                // If the question is already paused, do nothing
             }
         });
 
-        // Handle when the user presses Enter to submit their guess
-        answerInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                // Optionally handle the user's answer here (e.g., compare with correct answer)
-                console.log('User guessed: ', answerInput.value);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') { // Enter key pressed
+                if (isReading) {
+                    // Load a new question when the question is being read
+                    fetchQuestion(); // Move to the next question
+                } else {
+                    // Submit the user's answer (for now, just log it)
+                    console.log('User guessed: ', answerInput.value);
 
-                // Resume question reading after submitting the answer (no new question)
-                isReading = true;
-                answerContainer.style.display = 'none'; // Hide input field
-                nextBtnContainer.style.display = 'block'; // Show Next Question button again
-                displayQuestionWordByWord(); // Resume reading the question from where it stopped
+                    // Resume the question reading and hide input field
+                    isReading = true;
+                    answerContainer.style.display = 'none'; // Hide answer input field
+                    nextBtnContainer.style.display = 'block'; // Show Next Question button
+                    displayQuestionWordByWord(); // Resume reading the question
+                }
             }
         });
+
 
         // Navigate back to the welcome page
         document.getElementById('back-btn').addEventListener('click', () => {
@@ -141,14 +136,14 @@
             padding: 10px;
             font-size: 1rem;
             width: 100%;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #ffd700;
+            color: 0a0f2c;
             border-radius: 5px;
             border: none;
         }
 
         #next-btn:hover {
-            background-color: #45a049;
+            background-color: #ffcc00;
         }
     </style>
 </body>
