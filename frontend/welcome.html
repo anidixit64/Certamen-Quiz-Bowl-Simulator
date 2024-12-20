@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certamen</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="welcome-container">
         <h1 class="title">Certamen</h1>
-        <button id="start-btn">Start</button>
+        <button id="start-btn" aria-label="Start Quiz">Start</button>
     </div>
+    <noscript>
+        <a href="/questions" class="fallback-link">Start the quiz</a>
+    </noscript>
     <script>
         document.getElementById('start-btn').addEventListener('click', () => {
             window.location.href = '/questions';  // Navigate to /questions

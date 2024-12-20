@@ -9,11 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
     nextButton.addEventListener('click', fetchQuestion);
 
     function fetchQuestion() {
-        fetch('http://127.0.0.1:5000/api/question')  // Make sure the backend is running
+        nextButton.disabled = true; // Disable button to prevent multiple clicks
+        questionElement.textContent = 'Loading...'; // Show a loading message
+
+        fetch('/api/question')  // Relative URL for compatibility across environments
             .then(response => response.json())
             .then(data => {
                 questionElement.textContent = data.question;
             })
-            .catch(error => console.error('Error fetching question:', error));
+            .catch(error => {
+                console.error('Error fetching question:', error);
+                questionElement.textContent = 'Failed to load question. Please try again.';
+            })
+            .finally(() => {
+                nextButton.disabled = false; // Re-enable button
+            });
     }
 });
+
