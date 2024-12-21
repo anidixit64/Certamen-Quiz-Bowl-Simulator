@@ -119,6 +119,36 @@ body {
     outline: 3px solid #ffd700;
 }
 
+ /* Styling for answer input field to match "Next Question" button */
+ #answer-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+/* Adjust answer input field margin to move it further down the page */
+#answer-container {
+    margin-top: 50px; /* Move it further down */
+}
+
+#next-btn {
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    background-color: #ffd700;
+    color: 0a0f2c;
+    border-radius: 5px;
+    border: none;
+}
+
+#next-btn:hover {
+    background-color: #ffcc00;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .title {

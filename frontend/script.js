@@ -1,138 +1,130 @@
+let intervalId; // Variable to store the interval for word display
+let isReading = true; // Flag to track whether the question is currently being read
+let index = 0; // To track the current word being displayed
+let words = []; // Array to hold the words of the current question
+let currentAnswer = ''; // Variable to store the current answer
+const questionElement = document.getElementById('question-text'); // Reference to the question text element
+const nextButton = document.getElementById('next-btn');
+const nextBtnContainer = document.getElementById('next-btn-container');
+const answerContainer = document.getElementById('answer-container');
+const answerInput = document.getElementById('answer-input');
+
+// Fetch a random question on page load
 document.addEventListener('DOMContentLoaded', () => {
-    const questionElement = document.getElementById('question-text');
-    const nextButton = document.getElementById('next-btn');
-    const pauseButton = document.getElementById('pause-btn');
-    const answerContainer = document.getElementById('answer-container');
-    const answerText = document.getElementById('answer-text');
-    const backBtn = document.getElementById('back-btn');
-    const answerInputContainer = document.getElementById('answer-input-container');
-    const answerInput = document.getElementById('answer-input');
-    const submitAnswerBtn = document.getElementById('submit-answer-btn');
-
-    let words = [];
-    let interval;
-    let isPaused = false;
-    let isReading = false;
-    let currentIndex = 0;
-    let correctAnswer = ''; // Store the correct answer for comparison
-
     fetchQuestion();
+});
 
-    nextButton.addEventListener('click', () => {
-        clearInterval(interval);
-        isPaused = false;
-        pauseButton.textContent = 'Pause';
-        fetchQuestion();
-    });
+// Fetch question function
+function fetchQuestion() {
+    // Reset state for new question
+    clearInterval(intervalId); // Clear any ongoing interval
+    isReading = true; // Reset to reading state
+    index = 0; // Reset word index
+    questionElement.innerHTML = ''; // Clear previous question content
+    answerContainer.style.display = 'none'; // Hide answer input field
+    nextBtnContainer.style.display = 'block'; // Show Next Question button
 
-    pauseButton.addEventListener('click', togglePause);
-    backBtn.addEventListener('click', () => window.location.href = '/');
-    submitAnswerBtn.addEventListener('click', checkAnswer);
+    // Clear the answer input field
+    answerInput.value = ''; 
 
-    function fetchQuestion() {
-        clearInterval(interval);
-        fetch('/api/question')
-            .then(response => response.json())
-            .then(data => {
-                let question = data.question.replace(/\(\*\)/g, '');
-                correctAnswer = data.answer; // Store the correct answer
-                words = question.split(/(\s+)/);
-                currentIndex = 0;
-                questionElement.innerHTML = '';
-                answerInputContainer.style.display = 'none';
-                answerContainer.style.display = 'none';
-                answerInput.value = ''; // Reset the input field
-                displayWords();
-            })
-            .catch(error => console.error('Error fetching question:', error));
-    }
+    fetch('/api/question')
+        .then(response => response.json())
+        .then(data => {
+            const questionText = data.question;
+            currentAnswer = data.answer; // Store the current answer
+            const match = data.original.match(/<b><u>(.*?)<\/u><\/b>/);
+            specificAnswer = match ? match[1] : ''; // Assign the matched part or an empty string if no match found
+            words = questionText.split(' '); // Split question into words
+            displayQuestionWordByWord(); // Start displaying the question word by word
+        })
+        .catch(error => console.error('Error fetching question:', error));
+}
 
-    function displayWords() {
-        clearInterval(interval);
-        interval = setInterval(() => {
-            if (!isPaused && currentIndex < words.length) {
-                questionElement.innerHTML += words[currentIndex++];
-            } else {
-                clearInterval(interval);
-                isReading = false;
-            }
-        }, 50);
-        isReading = true;
-    }
+// Display question word by word with no shifting
+function displayQuestionWordByWord() {
+    // Start displaying words from the current index
+    intervalId = setInterval(() => {
+        if (index < words.length) {
+            questionElement.innerHTML += words[index] + ' '; // Add each word with space
+            index++;
+        } else {
+            clearInterval(intervalId); // Stop the interval when all words are shown
+        }
+    }, 150); // 150 milliseconds delay between each word
+}
 
-    function togglePause() {
+// Fetch a new question when the "Next Question" button is clicked
+nextButton.addEventListener('click', fetchQuestion);
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === ' ') { // Spacebar pressed
         if (isReading) {
-            isPaused = !isPaused;
-            pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
-            if (!isPaused) displayWords();
+            // Pause the question and show input field for the answer
+            clearInterval(intervalId); // Stop the word-by-word display
+            answerContainer.style.display = 'block'; // Show input field
+            nextBtnContainer.style.display = 'none'; // Hide Next Question button
+            answerInput.focus(); // Focus on the input field
+            answerInput.value = ''; // Clear the input field each time spacebar is pressed
+            isReading = false; // Set to paused state
+        }
+        // If the question is already paused, do nothing
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { // Enter key pressed
+        if (isReading) {
+            // Load a new question when the question is being read
+            fetchQuestion(); // Move to the next question
+        } else {
+            // Submit the user's answer
+            const userGuess = answerInput.value.trim();
+            console.log('User guessed: ', userGuess);
+
+            // Check if the user's guess matches the answer
+            if (userGuess.toLowerCase() === currentAnswer.toLowerCase() || userGuess.toLowerCase() === specificAnswer.toLowerCase()) {
+                // Show the "Correct!" message and hide the "Next Question" button
+                answerContainer.style.display = 'none'; // Hide the Next Question button
+                
+                const correctMessage = document.createElement('p'); // Create a new paragraph element
+                correctMessage.textContent = 'Correct!'; // Set the text to "Correct!"
+                correctMessage.style.color = 'green'; // Set the color to green
+                correctMessage.style.fontSize = '1.5rem'; // Set font size to match button size
+                correctMessage.style.fontWeight = 'bold'; // Make it bold
+                nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message below the container
+                
+                setTimeout(() => {
+                    correctMessage.remove(); // Remove the "Correct!" message after 5 seconds
+                    fetchQuestion(); // Fetch the next question after a short delay
+                }, 750); // 5-second delay before fetching the next question
+            } else {
+                // Show the "Correct!" message and hide the "Next Question" button
+                answerContainer.style.display = 'none'; // Hide the Next Question button
+                
+                const correctMessage = document.createElement('p'); // Create a new paragraph element
+                correctMessage.textContent = 'Incorrect!'; // Set the text to "Correct!"
+                correctMessage.style.color = 'red'; // Set the color to green
+                correctMessage.style.fontSize = '1.5rem'; // Set font size to match button size
+                correctMessage.style.fontWeight = 'bold'; // Make it bold
+                nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message below the container
+                
+                setTimeout(() => {
+                    correctMessage.remove(); // Remove the "Correct!" message after 5 seconds
+                    // Clear the answer input field before hiding it
+                    answerInput.value = '';
+
+                    // Resume the question reading and hide input field
+                    isReading = true;
+                    answerContainer.style.display = 'none'; // Hide answer input field
+                    nextBtnContainer.style.display = 'block'; // Show Next Question button
+                    displayQuestionWordByWord(); // Resume reading the question
+                }, 750); // 5-second delay before fetching the next question
+            }
         }
     }
+});
 
-    function checkAnswer() {
-        const userAnswer = answerInput.value.trim();
-        if (userAnswer === correctAnswer) {
-            answerText.textContent = 'Correct!';
-            answerText.style.color = 'green';
-            answerContainer.style.display = 'block'; // Show the correct message
-
-            // Hide the message and fetch the next question after 0.35 seconds
-            setTimeout(() => {
-                answerContainer.style.display = 'none'; // Hide the message
-                fetchQuestion(); // Fetch the next question
-            }, 350); // 350 milliseconds delay
-        } else {
-            answerText.textContent = 'Incorrect. Try again!';
-            answerText.style.color = 'red';
-            answerInputContainer.style.display = 'none'; // Hide the input bar
-            answerInput.value = ''; // Reset the input field
-
-            // Show the incorrect message and then hide it after 0.35 seconds
-            answerContainer.style.display = 'block'; // Show the answer feedback
-            setTimeout(() => {
-                answerContainer.style.display = 'none'; // Hide the answer feedback
-                // Resume reading
-                isPaused = false;
-                pauseButton.textContent = 'Pause';
-                displayWords();
-            }, 350); // 350 milliseconds delay
-        }
-    }
-
-    document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            event.preventDefault();
-            // Show the input field and stop reading if the question is currently being read
-            if (isReading) {
-                isPaused = true;
-                pauseButton.textContent = 'Resume';
-                answerInputContainer.style.display = 'block'; // Show input field
-                answerInput.focus(); // Focus on the input field
-            } else {
-                // If the question is not being read, still show the input field
-                answerInputContainer.style.display = 'block'; // Show input field
-                answerInput.focus(); // Focus on the input field
-            }
-        } else if (event.code === 'ArrowRight') {
-            event.preventDefault();
-            // Only trigger the next question functionality if the input field is not focused
-            if (document.activeElement !== answerInput) {
-                nextButton.click();
-            } else {
-                // Move cursor within the answer input field
-                const cursorPosition = answerInput.selectionStart;
-                answerInput.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
-            }
-        } else if (event.code === 'Enter') {
-            // Only trigger checkAnswer if the input field is focused
-            if (document.activeElement === answerInput) {
-                event.preventDefault();
-                checkAnswer(); // Call the checkAnswer function when Enter is pressed
-            }
-        } else {
-            // Allow all other keyboard symbols in the input field
-            if (document.activeElement === answerInput) {
-                return;
-            }
-        }
-    });
+// Navigate back to the welcome page
+document.getElementById('back-btn').addEventListener('click', () => {
+    window.location.href = '/';  // Navigate to the welcome page
 });
