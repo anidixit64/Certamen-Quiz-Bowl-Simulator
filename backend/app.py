@@ -24,7 +24,7 @@ def get_random_question():
     if not questions:
         return jsonify({"error": "No questions available"}), 500
     question = random.choice(questions)
-    return jsonify({"question": question['question_sanitized']})
+    return jsonify({"question": question['question_sanitized'], "answer": question['answer_sanitized'], "original": question['answer']})
 
 @app.route('/')
 def serve_welcome():
