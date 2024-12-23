@@ -138,6 +138,22 @@ button:focus-visible {
     transition: width 0.1s linear; /* Smooth transition when the width changes */
 }
 
+#question-timer-container {
+    width: 100%;
+    height: 10px; /* Adjust the height of the container */
+    background-color: navy; /* Background color for the outer container */
+    margin-top: 20px; /* Space above the timer container */
+    display: none; /* Hidden by default, can be shown when needed */
+}
+
+/* Inner progress bar for the timer */
+#question-timer-progress {
+    width: 0%; /* Start with 0% width, will be updated dynamically */
+    height: 100%; /* Full height of the container */
+    background-color: #ffd700; /* Color of the progress bar */
+    transition: width 0.1s linear; /* Smooth transition when the width changes */
+}
+
 
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {

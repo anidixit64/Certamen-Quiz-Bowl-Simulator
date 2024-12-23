@@ -7,6 +7,8 @@ let specificAnswer = ''; // Variable to store the specific part of the answer
 let timer; // Variable to hold the timeout for the 10-second timer
 let spacebarTimer; // Timer for spacebar-triggered answer submission
 let spacebarTimeLeft = 10; // Time remaining for the spacebar timer in seconds
+let questionTimer;
+let questionTimerLeft = 10;
 const questionElement = document.getElementById('question-text'); // Reference to the question text element
 const nextButton = document.getElementById('next-btn');
 const nextBtnContainer = document.getElementById('next-btn-container');
@@ -14,6 +16,9 @@ const answerContainer = document.getElementById('answer-container');
 const answerInput = document.getElementById('answer-input');
 const spacebarTimerContainer = document.getElementById('spacebar-timer-container'); // Spacebar timer container
 const spacebarTimerProgress = document.getElementById('spacebar-timer-progress'); // Progress bar element
+const questionTimerContainer = document.getElementById('question-timer-container'); // Spacebar timer container
+const questionTimerProgress = document.getElementById('question-timer-progress');
+
 
 // Fetch a random question on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -102,6 +107,8 @@ function displayQuestionWordByWord() {
             index++;
         } else {
             clearInterval(intervalId); // Stop the interval when all words are shown
+            questionTimerLeft = 10;
+            questionTimerProgress.style.width = '100%';
             startTimer(); // Start the 10-second timer
         }
     }, 150); // 150 milliseconds delay between each word
@@ -109,6 +116,8 @@ function displayQuestionWordByWord() {
 
 // Start a 10-second timer after the question is fully read
 function startTimer() {
+    questionTimerContainer.style.display = 'block';
+    /*
     timer = setTimeout(() => {
         nextBtnContainer.style.display = 'none';
 
@@ -125,6 +134,31 @@ function startTimer() {
             fetchQuestion(); // Fetch the next question
         }, 1100);
     }, 10000); // 10-second delay
+    */
+
+    // Start spacebar timer countdown
+    questionTimer = setInterval(() => {
+        questionTimerLeft--;
+        questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`; // Update the progress bar width
+        if (questionTimerLeft == 0) {
+            clearInterval(questionTimer); // Stop the countdown
+            questionTimerContainer.style.display = 'none';
+            nextBtnContainer.style.display = 'none';
+
+            // Display the correct answer after 10 seconds
+            const correctMessage = document.createElement('p'); // Create a new paragraph element
+            correctMessage.textContent = `${currentAnswer}`; // Set the text
+            correctMessage.style.color = 'yellow'; // Set the color
+            correctMessage.style.fontSize = '1.5rem'; // Set font size
+            correctMessage.style.fontWeight = 'bold'; // Make it bold
+            nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message
+
+            setTimeout(() => {
+                correctMessage.remove(); // Remove the message after 5 seconds
+                fetchQuestion(); // Fetch the next question
+            }, 1500);
+        }
+    }, 1000);
 }
 
 // Fetch a new question when the "Next Question" button is clicked
@@ -151,9 +185,9 @@ document.addEventListener('keydown', (event) => {
             spacebarTimer = setInterval(() => {
                 spacebarTimeLeft--;
                 spacebarTimerProgress.style.width = `${(spacebarTimeLeft / 10) * 100}%`; // Update the progress bar width
-                if (spacebarTimeLeft <= 0) {
+                if (spacebarTimeLeft == 0) {
                     clearInterval(spacebarTimer); // Stop the countdown
-                    sspacebarTimerContainer.style.display = 'none';
+                    spacebarTimerContainer.style.display = 'none';
                     submitAnswer(''); // Submit a blank answer if time runs out
                 }
             }, 1000); // Decrease every second
