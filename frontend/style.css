@@ -55,12 +55,17 @@ button:focus-visible {
 }
 
 /* Questions Page Styles */
+/* Ensure the question container does not move when the button is relocated */
 .question-container {
+    position: relative; /* Allows absolute positioning of children */
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 90%;
     max-width: 800px;
+    padding-top: 70px; /* Adjust spacing */
+    justify-content: center;
+    min-height: 40vh; /* Prevents shrinking when elements appear */
 }
 
 .question-box {
@@ -81,9 +86,25 @@ button:focus-visible {
     line-height: 1.5;
 }
 
+/* Position the Next Button at the Top */
+#next-btn-container {
+    position: absolute;
+    top: -10px; /* Moved up slightly */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20; /* Ensure it stays above other elements */
+}
+
+/* Ensure the button itself is properly styled */
 #next-btn {
-    margin-top: 30px;
-    font-size: 1.2rem;
+    padding: 10px 30px;
+    font-size: 1rem;
+    border-radius: 5px;
+    background-color: #ffd700;
+    color: #0a0f2c;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 #back-btn {
@@ -98,6 +119,10 @@ button:focus-visible {
 
 #back-btn:hover {
     background-color: #ddd;
+}
+
+#next-btn:hover {
+    background-color: #ffcc00;
 }
 
 /* Answer Input Field Styling */
@@ -118,7 +143,11 @@ button:focus-visible {
 }
 
 #answer-container {
-    margin-top: 50px;
+    margin-top: 30px;
+    min-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Container for the entire spacebar timer */

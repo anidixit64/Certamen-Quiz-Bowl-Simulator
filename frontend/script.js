@@ -2,42 +2,300 @@ let intervalId; // Variable to store the interval for word display
 let isReading = true; // Flag to track whether the question is currently being read
 let index = 0; // To track the current word being displayed
 let words = []; // Array to hold the words of the current question
-let currentAnswer = ''; // Variable to store the current answer
-let specificAnswer = ''; // Variable to store the specific part of the answer
-let timer; // Variable to hold the timeout for the 10-second timer
-let spacebarTimer; // Timer for spacebar-triggered answer submission
-let spacebarTimeLeft = 10; // Time remaining for the spacebar timer in seconds
-let questionTimer;
-let questionTimerLeft = 10;
-const questionElement = document.getElementById('question-text'); // Reference to the question text element
+let currentAnswer = ''; // Variable to store the correct answer (with parentheses/brackets removed)
+let specificAnswer = ''; // Variable to store the specific part of the answer (underlined)
+let readingFinished = false; // NEW OR CHANGED ↓: We track when question reading is fully done
+
+// Timers
+let questionTimer; // 10-second "post-read" timer
+let questionTimerLeft = 10; // NEW OR CHANGED ↓: We'll keep track of leftover time
+let questionTimerStarted = false; // NEW OR CHANGED ↓: Did the post-read timer start yet?
+
+let spacebarTimer; // 10-second "buzz-in" timer
+let spacebarTimeLeft = 10;
+
+const questionElement = document.getElementById('question-text');
 const nextButton = document.getElementById('next-btn');
 const nextBtnContainer = document.getElementById('next-btn-container');
 const answerContainer = document.getElementById('answer-container');
 const answerInput = document.getElementById('answer-input');
-const spacebarTimerContainer = document.getElementById('spacebar-timer-container'); // Spacebar timer container
-const spacebarTimerProgress = document.getElementById('spacebar-timer-progress'); // Progress bar element
-const questionTimerContainer = document.getElementById('question-timer-container'); // Spacebar timer container
+
+// Timer bars
+const spacebarTimerContainer = document.getElementById('spacebar-timer-container');
+const spacebarTimerProgress = document.getElementById('spacebar-timer-progress');
+const questionTimerContainer = document.getElementById('question-timer-container');
 const questionTimerProgress = document.getElementById('question-timer-progress');
 
-
-// Fetch a random question on page load
+// =============================================================
+// FETCH QUESTION ON PAGE LOAD
+// =============================================================
 document.addEventListener('DOMContentLoaded', () => {
     fetchQuestion();
 });
 
-// Function to normalize text by removing punctuation, converting to lowercase, and trimming
+// =============================================================
+// FETCH A NEW QUESTION
+// =============================================================
+function fetchQuestion() {
+    // Reset all states for a fresh question
+    clearInterval(intervalId);
+    clearInterval(questionTimer);
+    clearInterval(spacebarTimer);
+
+    questionTimerLeft = 10;      // NEW OR CHANGED ↓
+    questionTimerStarted = false; // NEW OR CHANGED ↓
+    spacebarTimeLeft = 10;
+
+    readingFinished = false; // NEW OR CHANGED ↓
+    isReading = true;
+    index = 0;
+
+    // Hide & reset timer visuals
+    questionTimerContainer.style.display = 'none';
+    questionTimerProgress.style.width = '100%';
+
+    spacebarTimerContainer.style.display = 'none';
+    spacebarTimerProgress.style.width = '100%';
+
+    // Hide answer container
+    answerContainer.style.display = 'none';
+    answerInput.value = '';
+
+    // Clear old question text
+    questionElement.innerHTML = 'Loading question...';
+    nextBtnContainer.style.display = 'block';
+
+    fetch('/api/question')
+        .then(response => response.json())
+        .then(data => {
+            // Remove parentheses & brackets from answer
+            let sanitizedAnswer = data.answer
+                .replace(/\[.*?\]/g, '')  // Remove [ ... ]
+                .replace(/\(.*?\)/g, ''); // Remove ( ... )
+            currentAnswer = sanitizedAnswer;
+
+            // Extract <b><u>... if present
+            const match = data.original.match(/<b><u>(.*?)<\/u><\/b>/);
+            specificAnswer = match ? match[1] : '';
+
+            // Split question text into words
+            words = data.question.split(' ');
+            questionElement.innerHTML = '';
+            displayQuestionWordByWord();
+        })
+        .catch(error => console.error('Error fetching question:', error));
+}
+
+// =============================================================
+// DISPLAY QUESTION WORD-BY-WORD
+// =============================================================
+function displayQuestionWordByWord() {
+    clearInterval(intervalId); // Ensure no previous interval is running before starting a new one
+
+    index = 0; // Reset the word index
+    questionElement.innerHTML = ''; // Clear the previous question
+
+    intervalId = setInterval(() => {
+        if (index < words.length) {
+            questionElement.innerHTML += words[index] + ' ';
+            index++;
+        } else {
+            clearInterval(intervalId); // Stop interval once all words are displayed
+            readingFinished = true;
+            startPostReadTimer();
+        }
+    }, 150);
+}
+
+// =============================================================
+// START THE 10-SECOND "POST-READ" TIMER
+// =============================================================
+function startPostReadTimer() {
+    if (!questionTimerStarted) {
+        questionTimerLeft = 10; // Only reset to 10 the first time
+        questionTimerStarted = true;
+    }
+
+    questionTimerContainer.style.display = 'block';
+    questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`;
+
+    questionTimer = setInterval(() => {
+        questionTimerLeft--;
+        questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`;
+
+        if (questionTimerLeft <= 0) {
+            clearInterval(questionTimer);
+            questionTimerContainer.style.display = 'none';
+
+            // Time's up => Show correct answer for 5s
+            showCorrectAnswerForFiveSeconds();
+        }
+    }, 1000);
+}
+
+// =============================================================
+// START THE 10-SECOND "BUZZ-IN" TIMER
+// =============================================================
+function startSpacebarTimer() {
+    spacebarTimeLeft = 10;
+    spacebarTimerContainer.style.display = 'block';
+    spacebarTimerProgress.style.width = '100%';
+
+    spacebarTimer = setInterval(() => {
+        spacebarTimeLeft--;
+        spacebarTimerProgress.style.width = `${(spacebarTimeLeft / 10) * 100}%`;
+
+        if (spacebarTimeLeft <= 0) {
+            clearInterval(spacebarTimer);
+            spacebarTimerContainer.style.display = 'none';
+            // Mark as incorrect if time runs out
+            submitAnswer('');
+        }
+    }, 1000);
+}
+
+// =============================================================
+// LISTEN FOR KEY PRESSES
+// =============================================================
+document.addEventListener('keydown', (event) => {
+    // SPACE => BUZZ IN
+    if (event.key === ' ') {
+        // If question is reading or just finished, user can buzz in
+        if (isReading || readingFinished) {
+            // Stop reading (if still going)
+            clearInterval(intervalId);
+
+            // Pause the post-read timer (don't reset leftover time!)
+            clearInterval(questionTimer);
+            questionTimerContainer.style.display = 'none';
+
+            // Show the answer input
+            answerContainer.style.display = 'block';
+            nextBtnContainer.style.display = 'block';
+            answerInput.focus();
+            answerInput.value = '';
+
+            // Start the buzz-in timer
+            startSpacebarTimer();
+
+            // We are no longer reading
+            isReading = false;
+        }
+    }
+
+    // ENTER => SUBMIT OR NEXT
+    if (event.key === 'Enter') {
+        // If not reading => the user is submitting an answer
+        if (!isReading) {
+            clearInterval(spacebarTimer);
+            spacebarTimerContainer.style.display = 'none';
+
+            const userGuess = answerInput.value.trim();
+            submitAnswer(userGuess);
+        } else {
+            // If reading => skip to next question
+            fetchQuestion();
+        }
+    }
+});
+
+// =============================================================
+// NEXT BUTTON => FETCH NEXT QUESTION
+// =============================================================
+nextButton.addEventListener('click', fetchQuestion);
+
+// =============================================================
+// SUBMIT USER ANSWER
+// =============================================================
+function submitAnswer(userGuess) {
+    console.log('User guessed:', userGuess);
+    answerContainer.style.display = 'none';
+
+    if (
+        isApproximatelyEqual(userGuess, currentAnswer) ||
+        isApproximatelyEqual(userGuess, specificAnswer)
+    ) {
+        // CORRECT
+        showTemporaryMessage('Correct!', 'green');
+        setTimeout(() => {
+            fetchQuestion();
+        }, 750);
+    } else {
+        // INCORRECT
+        showTemporaryMessage('Incorrect!', 'red');
+
+        setTimeout(() => {
+            // If question reading wasn't finished, resume
+            if (!readingFinished) {
+                isReading = true;
+                intervalId = setInterval(() => {
+                    if (index < words.length) {
+                        questionElement.innerHTML += words[index] + ' ';
+                        index++;
+                    } else {
+                        clearInterval(intervalId);
+                        readingFinished = true;
+                        // Resume or start the post-read timer
+                        startPostReadTimer();
+                    }
+                }, 150);
+            } else {
+                // If reading was finished, resume the leftover post-read time
+                if (questionTimerLeft > 0) {
+                    startPostReadTimer();
+                } else {
+                    // If no time left, show correct answer
+                    showCorrectAnswerForFiveSeconds();
+                }
+            }
+        }, 750);
+    }
+}
+
+// =============================================================
+// SHOW CORRECT ANSWER FOR 5 SECONDS
+// =============================================================
+function showCorrectAnswerForFiveSeconds() {
+    const correctMessage = document.createElement('p');
+    correctMessage.textContent = currentAnswer;
+    correctMessage.style.color = 'yellow';
+    correctMessage.style.fontSize = '1.5rem';
+    correctMessage.style.fontWeight = 'bold';
+    nextBtnContainer.parentElement.appendChild(correctMessage);
+
+    // Wait 5 seconds before loading next question
+    setTimeout(() => {
+        correctMessage.remove();
+        fetchQuestion();
+    }, 3000);
+}
+
+// =============================================================
+// HELPER: APPROXIMATELY EQUAL
+// =============================================================
+function isApproximatelyEqual(input, answer) {
+    const normalizedInput = normalizeText(input);
+    const normalizedAnswer = normalizeText(answer);
+    const distance = levenshtein(normalizedInput, normalizedAnswer);
+    return distance <= Math.max(normalizedAnswer.length * 0.3, 2);
+}
+
+// =============================================================
+// HELPER: NORMALIZE TEXT
+// =============================================================
 function normalizeText(text) {
     return text
-        .replace(/[\[\](){}<>]/g, '') // Remove brackets and their content
-        .replace(/[^a-zA-Z0-9\s]/g, '') // Remove other punctuation
+        .replace(/[\[\](){}<>]/g, '')
+        .replace(/[^a-zA-Z0-9\s]/g, '')
         .toLowerCase()
         .trim();
 }
 
-// Function to calculate Levenshtein Distance
+// =============================================================
+// HELPER: LEVENSHTEIN
+// =============================================================
 function levenshtein(a, b) {
     const matrix = [];
-
     for (let i = 0; i <= b.length; i++) {
         matrix[i] = [i];
     }
@@ -58,205 +316,26 @@ function levenshtein(a, b) {
             }
         }
     }
-
     return matrix[b.length][a.length];
 }
 
-// Function to check if two strings are approximately equal
-function isApproximatelyEqual(input, answer) {
-    const normalizedInput = normalizeText(input);
-    const normalizedAnswer = normalizeText(answer);
-    const distance = levenshtein(normalizedInput, normalizedAnswer);
-    return distance <= Math.max(normalizedAnswer.length * 0.3, 2); // Allow up to 30% difference or a minimum of 2 characters
+// =============================================================
+// HELPER: SHOW TEMPORARY MESSAGE
+// =============================================================
+function showTemporaryMessage(text, color) {
+    const msg = document.createElement('p');
+    msg.textContent = text;
+    msg.style.color = color;
+    msg.style.fontSize = '1.5rem';
+    msg.style.fontWeight = 'bold';
+    nextBtnContainer.parentElement.appendChild(msg);
+
+    // Remove after 0.75s
+    setTimeout(() => {
+        msg.remove();
+    }, 750);
 }
 
-// Fetch question function
-function fetchQuestion() {
-    // Reset state for new question
-    clearInterval(intervalId); // Clear any ongoing interval
-    clearTimeout(timer); // Clear any ongoing timer
-    clearTimeout(spacebarTimer); // Clear spacebar timer
-    isReading = true; // Reset to reading state
-    index = 0; // Reset word index
-    questionElement.innerHTML = ''; // Clear previous question content
-    answerContainer.style.display = 'none'; // Hide answer input field
-    nextBtnContainer.style.display = 'block'; // Show Next Question button
-
-    // Clear the answer input field
-    answerInput.value = ''; 
-
-    fetch('/api/question')
-        .then(response => response.json())
-        .then(data => {
-            const questionText = data.question;
-            currentAnswer = data.answer.replace(/\[.*?\]/g, ''); // Remove content in brackets
-            const match = data.original.match(/<b><u>(.*?)<\/u><\/b>/);
-            specificAnswer = match ? match[1] : ''; // Assign the matched part or an empty string if no match found
-            words = questionText.split(' '); // Split question into words
-            displayQuestionWordByWord(); // Start displaying the question word by word
-        })
-        .catch(error => console.error('Error fetching question:', error));
-}
-
-// Display question word by word with no shifting
-function displayQuestionWordByWord() {
-    // Start displaying words from the current index
-    intervalId = setInterval(() => {
-        if (index < words.length) {
-            questionElement.innerHTML += words[index] + ' '; // Add each word with space
-            index++;
-        } else {
-            clearInterval(intervalId); // Stop the interval when all words are shown
-            questionTimerLeft = 10;
-            questionTimerProgress.style.width = '100%';
-            startTimer(); // Start the 10-second timer
-        }
-    }, 150); // 150 milliseconds delay between each word
-}
-
-// Start a 10-second timer after the question is fully read
-function startTimer() {
-    questionTimerContainer.style.display = 'block';
-    /*
-    timer = setTimeout(() => {
-        nextBtnContainer.style.display = 'none';
-
-        // Display the correct answer after 10 seconds
-        const correctMessage = document.createElement('p'); // Create a new paragraph element
-        correctMessage.textContent = `${currentAnswer}`; // Set the text
-        correctMessage.style.color = 'yellow'; // Set the color
-        correctMessage.style.fontSize = '1.5rem'; // Set font size
-        correctMessage.style.fontWeight = 'bold'; // Make it bold
-        nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message
-
-        setTimeout(() => {
-            correctMessage.remove(); // Remove the message after 5 seconds
-            fetchQuestion(); // Fetch the next question
-        }, 1100);
-    }, 10000); // 10-second delay
-    */
-
-    // Start spacebar timer countdown
-    questionTimer = setInterval(() => {
-        questionTimerLeft--;
-        questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`; // Update the progress bar width
-        if (questionTimerLeft == 0) {
-            clearInterval(questionTimer); // Stop the countdown
-            questionTimerContainer.style.display = 'none';
-            nextBtnContainer.style.display = 'none';
-
-            // Display the correct answer after 10 seconds
-            const correctMessage = document.createElement('p'); // Create a new paragraph element
-            correctMessage.textContent = `${currentAnswer}`; // Set the text
-            correctMessage.style.color = 'yellow'; // Set the color
-            correctMessage.style.fontSize = '1.5rem'; // Set font size
-            correctMessage.style.fontWeight = 'bold'; // Make it bold
-            nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message
-
-            setTimeout(() => {
-                correctMessage.remove(); // Remove the message after 5 seconds
-                fetchQuestion(); // Fetch the next question
-            }, 1500);
-        }
-    }, 1000);
-}
-
-// Fetch a new question when the "Next Question" button is clicked
-nextButton.addEventListener('click', fetchQuestion);
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === ' ') { // Spacebar pressed
-        if (isReading) {
-            // Pause the question and show input field for the answer
-            clearInterval(intervalId); // Stop the word-by-word display
-            clearTimeout(timer); // Stop the 10-second timer
-            answerContainer.style.display = 'block'; // Show input field
-            nextBtnContainer.style.display = 'none'; // Hide Next Question button
-            answerInput.focus(); // Focus on the input field
-            answerInput.value = ''; // Clear the input field each time spacebar is pressed
-            isReading = false; // Set to paused state
-
-            // Show the spacebar timer visual
-            spacebarTimerContainer.style.display = 'block'; // Show the timer container
-            spacebarTimeLeft = 10; // Reset timer to 10 seconds
-            spacebarTimerProgress.style.width = '100%'; // Reset the progress bar width
-
-            // Start spacebar timer countdown
-            spacebarTimer = setInterval(() => {
-                spacebarTimeLeft--;
-                spacebarTimerProgress.style.width = `${(spacebarTimeLeft / 10) * 100}%`; // Update the progress bar width
-                if (spacebarTimeLeft == 0) {
-                    clearInterval(spacebarTimer); // Stop the countdown
-                    spacebarTimerContainer.style.display = 'none';
-                    submitAnswer(''); // Submit a blank answer if time runs out
-                }
-            }, 1000); // Decrease every second
-        }
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') { // Enter key pressed
-        if (isReading) {
-            // Load a new question when the question is being read
-            fetchQuestion(); // Move to the next question
-        } else {
-            // Submit the user's answer
-            clearTimeout(spacebarTimer); // Clear the spacebar-triggered timer
-            spacebarTimerContainer.style.display = 'none';
-            const userGuess = answerInput.value.trim();
-            submitAnswer(userGuess);
-        }
-    }
-});
-
-// Function to submit the user's answer
-function submitAnswer(userGuess) {
-    console.log('User guessed: ', userGuess);
-
-    // Check if the user's guess matches the answer
-    if (
-        isApproximatelyEqual(userGuess, currentAnswer) ||
-        isApproximatelyEqual(userGuess, specificAnswer)
-    ) {
-        // Show the "Correct!" message
-        answerContainer.style.display = 'none';
-
-        const correctMessage = document.createElement('p'); // Create a new paragraph element
-        correctMessage.textContent = 'Correct!'; // Set the text to "Correct!"
-        correctMessage.style.color = 'green'; // Set the color to green
-        correctMessage.style.fontSize = '1.5rem'; // Set font size to match button size
-        correctMessage.style.fontWeight = 'bold'; // Make it bold
-        nextBtnContainer.parentElement.appendChild(correctMessage); // Append the message below the container
-
-        setTimeout(() => {
-            correctMessage.remove(); // Remove the "Correct!" message after 5 seconds
-            fetchQuestion(); // Fetch the next question after a short delay
-        }, 750); // 5-second delay before fetching the next question
-    } else {
-        // Show the "Incorrect!" message
-        answerContainer.style.display = 'none';
-
-        const incorrectMessage = document.createElement('p'); // Create a new paragraph element
-        incorrectMessage.textContent = 'Incorrect!'; // Set the text to "Incorrect!"
-        incorrectMessage.style.color = 'red'; // Set the color to red
-        incorrectMessage.style.fontSize = '1.5rem'; // Set font size to match button size
-        incorrectMessage.style.fontWeight = 'bold'; // Make it bold
-        nextBtnContainer.parentElement.appendChild(incorrectMessage); // Append the message below the container
-
-        setTimeout(() => {
-            incorrectMessage.remove(); // Remove the "Incorrect!" message after 5 seconds
-            // Clear the answer input field before hiding it
-            answerInput.value = '';
-
-            // Resume the question reading and hide input field
-            isReading = true;
-            answerContainer.style.display = 'none'; // Hide answer input field
-            nextBtnContainer.style.display = 'block'; // Show Next Question button
-            displayQuestionWordByWord(); // Resume reading the question
-        }, 750); // 5-second delay before fetching the next question
-    }
-}
 
 // Navigate back to the welcome page
 document.getElementById('back-btn').addEventListener('click', () => {
