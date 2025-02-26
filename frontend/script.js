@@ -5,6 +5,7 @@ let words = []; // Array to hold the words of the current question
 let currentAnswer = ''; // Variable to store the correct answer (with parentheses/brackets removed)
 let specificAnswer = ''; // Variable to store the specific part of the answer (underlined)
 let readingFinished = false; // NEW OR CHANGED ↓: We track when question reading is fully done
+let buzzCooldown = false; // Global variable to track cooldown
 
 // Timers
 let questionTimer; // 10-second "post-read" timer
@@ -149,7 +150,7 @@ function startSpacebarTimer() {
             clearInterval(spacebarTimer);
             spacebarTimerContainer.style.display = 'none';
             // Mark as incorrect if time runs out
-            submitAnswer('');
+            submitAnswer(answerInput.value.trim());
         }
     }, 1000);
 }
@@ -159,7 +160,10 @@ function startSpacebarTimer() {
 // =============================================================
 document.addEventListener('keydown', (event) => {
     // SPACE => BUZZ IN
-    if (event.key === ' ') {
+    if (event.key === ' ' && !buzzCooldown) {
+        buzzCooldown = true;  // Activate cooldown
+        setTimeout(() => buzzCooldown = false, 1000);  // 1-second cooldown
+
         // If question is reading or just finished, user can buzz in
         if (isReading || readingFinished) {
             // Stop reading (if still going)
@@ -187,14 +191,13 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         // If not reading => the user is submitting an answer
         if (!isReading) {
-            clearInterval(spacebarTimer);
-            spacebarTimerContainer.style.display = 'none';
+            if (answerContainer.style.display !== 'none') {
+                clearInterval(spacebarTimer);
+                spacebarTimerContainer.style.display = 'none';
 
-            const userGuess = answerInput.value.trim();
-            submitAnswer(userGuess);
-        } else {
-            // If reading => skip to next question
-            fetchQuestion();
+                const userGuess = answerInput.value.trim();
+                submitAnswer(userGuess);
+            }
         }
     }
 });
