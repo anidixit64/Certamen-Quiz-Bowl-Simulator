@@ -6,6 +6,7 @@ let currentAnswer = ''; // Variable to store the correct answer (with parenthese
 let specificAnswer = ''; // Variable to store the specific part of the answer (underlined)
 let readingFinished = false; // NEW OR CHANGED ↓: We track when question reading is fully done
 let buzzCooldown = false; // Global variable to track cooldown
+let skipCooldown = true; // NEW OR CHANGED ↓: Prevents skipping too early
 
 // Timers
 let questionTimer; // 10-second "post-read" timer
@@ -21,6 +22,7 @@ const nextBtnContainer = document.getElementById('next-btn-container');
 const answerContainer = document.getElementById('answer-container');
 const answerInput = document.getElementById('answer-input');
 
+
 // Timer bars
 const spacebarTimerContainer = document.getElementById('spacebar-timer-container');
 const spacebarTimerProgress = document.getElementById('spacebar-timer-progress');
@@ -32,7 +34,16 @@ const questionTimerProgress = document.getElementById('question-timer-progress')
 // =============================================================
 document.addEventListener('DOMContentLoaded', () => {
     fetchQuestion();
+
+    const answerInput = document.getElementById('answer-input');
+    if (answerInput) { // Ensure the element exists before modifying it
+        answerInput.setAttribute('autocomplete', 'off'); // Disable autocomplete
+        answerInput.setAttribute('autocorrect', 'off');  // Disable autocorrect (iOS)
+        answerInput.setAttribute('autocapitalize', 'off'); // Disable auto-capitalization
+        answerInput.setAttribute('spellcheck', 'false'); // Disable spellcheck
+    }
 });
+
 
 // =============================================================
 // FETCH A NEW QUESTION
@@ -50,6 +61,12 @@ function fetchQuestion() {
     readingFinished = false; // NEW OR CHANGED ↓
     isReading = true;
     index = 0;
+
+    // Prevent skipping immediately
+    skipCooldown = true; // NEW OR CHANGED ↓
+    setTimeout(() => {
+        skipCooldown = false; // Allow skipping after 3 seconds
+    }, 3000); // NEW OR CHANGED ↓
 
     // Hide & reset timer visuals
     questionTimerContainer.style.display = 'none';
@@ -199,6 +216,10 @@ document.addEventListener('keydown', (event) => {
                 submitAnswer(userGuess);
             }
         }
+    }
+
+    if (event.key === 'ArrowRight' && !skipCooldown) { // NEW OR CHANGED ↓
+        fetchQuestion(); 
     }
 });
 
