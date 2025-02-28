@@ -178,28 +178,21 @@ function startSpacebarTimer() {
 document.addEventListener('keydown', (event) => {
     // SPACE => BUZZ IN
     if (event.key === ' ' && !buzzCooldown) {
-        buzzCooldown = true;  // Activate cooldown
-        setTimeout(() => buzzCooldown = false, 1000);  // 1-second cooldown
+        buzzCooldown = true;
+        setTimeout(() => buzzCooldown = false, 1000);
 
-        // If question is reading or just finished, user can buzz in
         if (isReading || readingFinished) {
-            // Stop reading (if still going)
             clearInterval(intervalId);
-
-            // Pause the post-read timer (don't reset leftover time!)
             clearInterval(questionTimer);
+            clearInterval(spacebarTimer); // 🔴 This ensures old timers are cleared
+            
             questionTimerContainer.style.display = 'none';
-
-            // Show the answer input
             answerContainer.style.display = 'block';
             nextBtnContainer.style.display = 'block';
             answerInput.focus();
             answerInput.value = '';
 
-            // Start the buzz-in timer
-            startSpacebarTimer();
-
-            // We are no longer reading
+            startSpacebarTimer(); 
             isReading = false;
         }
     }
