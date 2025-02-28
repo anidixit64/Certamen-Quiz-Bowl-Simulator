@@ -177,6 +177,10 @@ function startSpacebarTimer() {
 // =============================================================
 document.addEventListener('keydown', (event) => {
     // SPACE => BUZZ IN
+    if (event.key === ' ' && document.activeElement === answerInput) {
+        return;
+    }
+    
     if (event.key === ' ' && !buzzCooldown) {
         buzzCooldown = true;
         setTimeout(() => buzzCooldown = false, 1000);

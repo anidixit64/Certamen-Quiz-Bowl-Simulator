@@ -1,0 +1,18 @@
+2025-02-28 15:41:58.382 EST [17904] LOG:  starting PostgreSQL 14.17 (Homebrew) on x86_64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit
+2025-02-28 15:41:58.384 EST [17904] LOG:  could not bind IPv6 address "::1": Address already in use
+2025-02-28 15:41:58.384 EST [17904] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-02-28 15:41:58.384 EST [17904] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2025-02-28 15:41:58.384 EST [17904] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-02-28 15:41:58.384 EST [17904] WARNING:  could not create listen socket for "localhost"
+2025-02-28 15:41:58.385 EST [17904] FATAL:  could not create any TCP/IP sockets
+2025-02-28 15:41:58.387 EST [17904] LOG:  database system is shut down
+2025-02-28 15:49:21.214 EST [19489] LOG:  starting PostgreSQL 14.17 (Homebrew) on x86_64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit
+2025-02-28 15:49:21.217 EST [19489] LOG:  listening on IPv6 address "::1", port 5432
+2025-02-28 15:49:21.217 EST [19489] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-02-28 15:49:21.218 EST [19489] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2025-02-28 15:49:21.222 EST [19490] LOG:  database system shutdown was interrupted; last known up at 2025-02-28 15:49:08 EST
+2025-02-28 15:49:21.305 EST [19490] LOG:  invalid primary checkpoint record
+2025-02-28 15:49:21.305 EST [19490] PANIC:  could not locate a valid checkpoint record
+2025-02-28 15:49:21.306 EST [19489] LOG:  startup process (PID 19490) was terminated by signal 6: Abort trap: 6
+2025-02-28 15:49:21.306 EST [19489] LOG:  aborting startup due to startup process failure
+2025-02-28 15:49:21.307 EST [19489] LOG:  database system is shut down
