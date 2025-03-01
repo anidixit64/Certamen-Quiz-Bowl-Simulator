@@ -12,12 +12,21 @@ data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
 for filename in os.listdir(data_dir):
     if filename.endswith('.json'):
         try:
-            with open(os.path.join(data_dir, filename)) as f:
-                questions.extend(json.load(f))
-        except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"Error loading {filename}: {e}")
+            with open(os.path.join(data_dir, filename), encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):  # Ensure it's a list before extending
+                    questions.extend(data)
+                else:
+                    print(f"⚠️ Warning: {filename} does not contain a list of questions.")
+        except json.JSONDecodeError as e:
+            print(f"❌ Error decoding {filename}: {e}")
+        except FileNotFoundError as e:
+            print(f"❌ File not found: {filename} - {e}")
+        except Exception as e:
+            print(f"❌ Unexpected error loading {filename}: {e}")
 
-print(f"{len(questions)} questions loaded from the data directory.")
+print(f"✅ {len(questions)} questions loaded from the data directory.")
+
 
 @app.route('/api/question', methods=['GET'])
 def get_random_question():
