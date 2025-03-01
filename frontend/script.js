@@ -183,7 +183,7 @@ document.addEventListener('keydown', (event) => {
     
     if (event.key === ' ' && !buzzCooldown) {
         buzzCooldown = true;
-        setTimeout(() => buzzCooldown = false, 1000);
+        setTimeout(() => buzzCooldown = false, 500);
 
         if (isReading || readingFinished) {
             clearInterval(intervalId);
