@@ -17,23 +17,37 @@ cur = conn.cursor()
 # Directory containing JSON files
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
+def clean_text(text):
+    """ Remove NULL characters and strip whitespace. """
+    if text:
+        return text.replace('\x00', '').strip()
+    return None
+
+# Read all JSON files and insert questions into the database
 # Read all JSON files and insert questions into the database
 for filename in os.listdir(DATA_DIR):
     if filename.endswith('.json'):
         with open(os.path.join(DATA_DIR, filename), 'r', encoding='utf-8') as f:
             questions = json.load(f)
             for question in questions:
+                sanitized_answer = clean_text(question.get("answer_sanitized"))
+                sanitized_question = clean_text(question.get("question_sanitized"))
+
+                if not sanitized_answer or not sanitized_question:
+                    continue
+
                 cur.execute(
                     """
-                    INSERT INTO questions (question, answer, category, subcategory, tournament)
-                    VALUES (%s, %s, %s, %s, %s)
+                    INSERT INTO questions (question, answer, category, subcategory, tournament, answer_real)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     """,
                     (
-                        question["question_sanitized"],
-                        question["answer_sanitized"],
-                        question.get("category", None),
-                        question.get("subcategory", None),
-                        question.get("tournament", None),
+                        clean_text(question["question_sanitized"]),
+                        clean_text(question["answer_sanitized"]),
+                        clean_text(question.get("category")),
+                        clean_text(question.get("subcategory")),
+                        clean_text(question.get("tournament")),
+                        clean_text(question["answer"])
                     ),
                 )
 

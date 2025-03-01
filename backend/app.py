@@ -2,22 +2,51 @@ from flask import Flask, jsonify, request, send_from_directory
 import os
 import json
 import random
+import psycopg2
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 
-# Load all questions from JSON files in the data directory
-questions = []
-data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+# Database connection setup
+DB_NAME = "certamen"
+DB_USER = "aniketdixit"  # Change if your PostgreSQL user is different
+DB_PASSWORD = ""  # Add password if needed
+DB_HOST = "localhost"
 
-for filename in os.listdir(data_dir):
-    if filename.endswith('.json'):
-        try:
-            with open(os.path.join(data_dir, filename)) as f:
-                questions.extend(json.load(f))
-        except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"Error loading {filename}: {e}")
+# Function to fetch a random question from the database
+def get_random_question():
+    try:
+        conn = psycopg2.connect(
+            dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST
+        )
+        cur = conn.cursor()
+        
+        cur.execute("SELECT question, answer, category, subcategory, tournament FROM questions ORDER BY RANDOM() LIMIT 1;")
+        result = cur.fetchone()
 
-print(f"{len(questions)} questions loaded from the data directory.")
+        cur.close()
+        conn.close()
+
+        if result:
+            return {
+                "question": result[0],
+                "answer": result[1],
+                "category": result[2],
+                "subcategory": result[3],
+                "tournament": result[4]
+            }
+        else:
+            return None
+    except Exception as e:
+        print(f"Database error: {e}")
+        return None
+
+# Modify API endpoint to use PostgreSQL instead of JSON
+@app.route('/api/question', methods=['GET'])
+def fetch_question():
+    question = get_random_question()
+    if not question:
+        return jsonify({"error": "No questions available"}), 500
+    return jsonify(question)
 
 @app.route('/api/question', methods=['GET'])
 def get_random_question():
