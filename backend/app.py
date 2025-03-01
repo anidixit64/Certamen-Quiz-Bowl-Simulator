@@ -1,9 +1,13 @@
 from flask import Flask, jsonify, request, send_from_directory
+from fastapi import FastAPI
+import uvicorn
 import os
 import json
 import random
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='/')
+# Create Flask and FastAPI instances
+flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
+fastapi_app = FastAPI()
 
 # Load all questions from JSON files in the data directory
 questions = []
@@ -28,7 +32,8 @@ for filename in os.listdir(data_dir):
 print(f"✅ {len(questions)} questions loaded from the data directory.")
 
 
-@app.route('/api/question', methods=['GET'])
+
+@flask_app.route('/api/question', methods=['GET'])
 def get_random_question():
     if not questions:
         return jsonify({"error": "No questions available"}), 500
@@ -45,17 +50,17 @@ def get_random_question():
         "original": question.get('answer', 'Original answer not found')
     })
 
-@app.route('/')
+@flask_app.route('/')
 def serve_welcome():
     # Serve the welcome page
     return send_from_directory('../frontend', 'welcome.html')
 
-@app.route('/questions')
+@flask_app.route('/questions')
 def serve_questions():
     # Serve the main question page when accessing /questions
     return send_from_directory('../frontend', 'index.html')
 
-@app.route('/api', methods=['GET'])
+@flask_app.route('/api', methods=['GET'])
 def api_info():
     return jsonify({
         "endpoints": {
@@ -65,5 +70,5 @@ def api_info():
 
 if __name__ == '__main__':
     debug_mode = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
-    app.run(debug=debug_mode)
+    flask_app.run(debug=debug_mode)
 

@@ -66,7 +66,7 @@ function fetchQuestion() {
     skipCooldown = true; // NEW OR CHANGED ↓
     setTimeout(() => {
         skipCooldown = false; // Allow skipping after 3 seconds
-    }, 3000); // NEW OR CHANGED ↓
+    }, 1000); // NEW OR CHANGED ↓
 
     // Hide & reset timer visuals
     questionTimerContainer.style.display = 'none';
@@ -122,7 +122,7 @@ function displayQuestionWordByWord() {
             readingFinished = true;
             startPostReadTimer();
         }
-    }, 150);
+    }, 200);
 }
 
 // =============================================================
@@ -130,16 +130,16 @@ function displayQuestionWordByWord() {
 // =============================================================
 function startPostReadTimer() {
     if (!questionTimerStarted) {
-        questionTimerLeft = 10; // Only reset to 10 the first time
+        questionTimerLeft = 5; // Only reset to 10 the first time
         questionTimerStarted = true;
     }
 
     questionTimerContainer.style.display = 'block';
-    questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`;
+    questionTimerProgress.style.width = `${(questionTimerLeft / 5) * 100}%`;
 
     questionTimer = setInterval(() => {
         questionTimerLeft--;
-        questionTimerProgress.style.width = `${(questionTimerLeft / 10) * 100}%`;
+        questionTimerProgress.style.width = `${(questionTimerLeft / 5) * 100}%`;
 
         if (questionTimerLeft <= 0) {
             clearInterval(questionTimer);
