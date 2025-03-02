@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request, send_from_directory
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import uvicorn
 import os
 import json
 import random
+import threading
 
 # Create Flask and FastAPI instances
 flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -50,6 +52,22 @@ def get_random_question():
         "original": question.get('answer', 'Original answer not found')
     })
 
+@fastapi_app.get("/api/question")
+def get_random_question_fastapi():
+    if not questions:
+        return JSONResponse(content={"error": "No questions available"}, status_code=500)
+
+    question = random.choice(questions)
+
+    if "question_sanitized" not in question or "answer_sanitized" not in question:
+        return JSONResponse(content={"error": "Invalid question format"}, status_code=500)
+
+    return {
+        "question": question.get('question_sanitized', 'Question not found'),
+        "answer": question.get('answer_sanitized', 'Answer not found'),
+        "original": question.get('answer', 'Original answer not found')
+    }
+
 @flask_app.route('/')
 def serve_welcome():
     # Serve the welcome page
@@ -68,7 +86,24 @@ def api_info():
         }
     })
 
-if __name__ == '__main__':
+@fastapi_app.get("/api/fastapi_test")
+def fastapi_test():
+    return {"message": "FastAPI is working alongside Flask!"}
+
+def run_flask():
     debug_mode = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
-    flask_app.run(debug=debug_mode)
+    flask_app.run(debug=debug_mode, port=5000, use_reloader=False)
+
+def run_fastapi():
+    uvicorn.run(fastapi_app, host="127.0.0.1", port=8000)
+
+if __name__ == '__main__':
+    flask_thread = threading.Thread(target=run_flask)
+    fastapi_thread = threading.Thread(target=run_fastapi)
+
+    flask_thread.start()
+    fastapi_thread.start()
+
+    flask_thread.join()
+    fastapi_thread.join()
 
