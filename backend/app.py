@@ -39,10 +39,9 @@ print(f"✅ {len(questions)} questions loaded from the data directory.")
 def get_random_question():
     if not questions:
         return jsonify({"error": "No questions available"}), 500
-    
+
     question = random.choice(questions)
 
-    # Ensure required fields exist
     if "question_sanitized" not in question or "answer_sanitized" not in question:
         return jsonify({"error": "Invalid question format"}), 500
 
@@ -51,6 +50,7 @@ def get_random_question():
         "answer": question.get('answer_sanitized', 'Answer not found'),
         "original": question.get('answer', 'Original answer not found')
     })
+
 
 @fastapi_app.get("/api/question")
 def get_random_question_fastapi():
@@ -66,6 +66,9 @@ def get_random_question_fastapi():
         "question": question.get('question_sanitized', 'Question not found'),
         "answer": question.get('answer_sanitized', 'Answer not found'),
         "original": question.get('answer', 'Original answer not found')
+        "subcategory": question.get('subcategory', 'Subcategory not found'),
+        "category": question.get('category', 'Category not found'),
+        "tournament": question.get('tournament', 'Tournament answer not found')
     }
 
 @flask_app.route('/')
