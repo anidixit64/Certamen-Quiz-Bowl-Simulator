@@ -83,7 +83,7 @@ function fetchQuestion() {
     questionElement.innerHTML = 'Loading question...';
     nextBtnContainer.style.display = 'block';
 
-    fetch('/api/question')
+    fetch('http://127.0.0.1:8000/api/question')
         .then(response => response.json())
         .then(data => {
             // Remove parentheses & brackets from answer

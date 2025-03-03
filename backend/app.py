@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 import json
@@ -10,6 +11,16 @@ import threading
 # Create Flask and FastAPI instances
 flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 fastapi_app = FastAPI()
+
+# Enable CORS so the frontend can communicate with FastAPI
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow requests from any origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 # Load all questions from JSON files in the data directory
 questions = []
@@ -32,24 +43,6 @@ for filename in os.listdir(data_dir):
             print(f"❌ Unexpected error loading {filename}: {e}")
 
 print(f"✅ {len(questions)} questions loaded from the data directory.")
-
-
-
-@flask_app.route('/api/question', methods=['GET'])
-def get_random_question():
-    if not questions:
-        return jsonify({"error": "No questions available"}), 500
-
-    question = random.choice(questions)
-
-    if "question_sanitized" not in question or "answer_sanitized" not in question:
-        return jsonify({"error": "Invalid question format"}), 500
-
-    return jsonify({
-        "question": question.get('question_sanitized', 'Question not found'),
-        "answer": question.get('answer_sanitized', 'Answer not found'),
-        "original": question.get('answer', 'Original answer not found')
-    })
 
 
 @fastapi_app.get("/api/question")
