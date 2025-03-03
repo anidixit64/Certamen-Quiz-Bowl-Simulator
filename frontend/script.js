@@ -288,7 +288,7 @@ function showCorrectAnswerForFiveSeconds() {
     setTimeout(() => {
         correctMessage.remove();
         fetchQuestion();
-    }, 3000);
+    }, 1750);
 }
 
 // =============================================================

@@ -46,7 +46,7 @@ print(f"✅ {len(questions)} questions loaded from the data directory.")
 
 
 @fastapi_app.get("/api/question")
-def get_random_question_fastapi():
+async def get_random_question_fastapi():
     if not questions:
         return JSONResponse(content={"error": "No questions available"}, status_code=500)
 
@@ -74,13 +74,13 @@ def serve_questions():
     # Serve the main question page when accessing /questions
     return send_from_directory('../frontend', 'index.html')
 
-@flask_app.route('/api', methods=['GET'])
-def api_info():
-    return jsonify({
+@fastapi_app.get("/api")
+async def api_info_fastapi():
+    return {
         "endpoints": {
             "/api/question": "Get a random sanitized question"
         }
-    })
+    }
 
 @fastapi_app.get("/api/fastapi_test")
 def fastapi_test():
