@@ -48,25 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================================
 // FETCH A NEW QUESTION
 // =============================================================
-function fetchQuestion() {
+async function fetchQuestion() {
     // Reset all states for a fresh question
     clearInterval(intervalId);
     clearInterval(questionTimer);
     clearInterval(spacebarTimer);
 
-    questionTimerLeft = 10;      // NEW OR CHANGED ↓
-    questionTimerStarted = false; // NEW OR CHANGED ↓
+    questionTimerLeft = 10;
+    questionTimerStarted = false;
     spacebarTimeLeft = 10;
 
-    readingFinished = false; // NEW OR CHANGED ↓
+    readingFinished = false;
     isReading = true;
     index = 0;
 
     // Prevent skipping immediately
-    skipCooldown = true; // NEW OR CHANGED ↓
+    skipCooldown = true;
     setTimeout(() => {
-        skipCooldown = false; // Allow skipping after 3 seconds
-    }, 1000); // NEW OR CHANGED ↓
+        skipCooldown = false;
+    }, 1000);
 
     // Hide & reset timer visuals
     questionTimerContainer.style.display = 'none';
@@ -83,26 +83,39 @@ function fetchQuestion() {
     questionElement.innerHTML = 'Loading question...';
     nextBtnContainer.style.display = 'block';
 
-    fetch('http://127.0.0.1:8000/api/question')
-        .then(response => response.json())
-        .then(data => {
-            // Remove parentheses & brackets from answer
-            let sanitizedAnswer = data.answer
-                .replace(/\[.*?\]/g, '')  // Remove [ ... ]
-                .replace(/\(.*?\)/g, ''); // Remove ( ... )
-            currentAnswer = sanitizedAnswer;
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/question');
 
-            // Extract <b><u>... if present
-            const match = data.original.match(/<b><u>(.*?)<\/u><\/b>/);
-            specificAnswer = match ? match[1] : '';
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
 
-            // Split question text into words
-            words = data.question.split(' ');
-            questionElement.innerHTML = '';
-            displayQuestionWordByWord();
-        })
-        .catch(error => console.error('Error fetching question:', error));
+        const data = await response.json();
+
+        if (!data.question) {
+            throw new Error("Invalid question data received");
+        }
+
+        // Remove parentheses & brackets from answer
+        let sanitizedAnswer = data.answer
+            .replace(/\[.*?\]/g, '')  // Remove [ ... ]
+            .replace(/\(.*?\)/g, ''); // Remove ( ... )
+        currentAnswer = sanitizedAnswer;
+
+        // Extract <b><u>... if present
+        const match = data.original.match(/<b><u>(.*?)<\/u><\/b>/);
+        specificAnswer = match ? match[1] : '';
+
+        // Split question text into words
+        words = data.question.split(' ');
+        questionElement.innerHTML = '';
+        displayQuestionWordByWord();
+    } catch (error) {
+        console.error("Error fetching question:", error);
+        questionElement.innerHTML = "⚠️ Error loading question. Please try again.";
+    }
 }
+
 
 // =============================================================
 // DISPLAY QUESTION WORD-BY-WORD

@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import uvicorn
 import os
 import json
@@ -23,26 +24,49 @@ fastapi_app.add_middleware(
 
 
 # Load all questions from JSON files in the data directory
+from fastapi import BackgroundTasks
+
 questions = []
 data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
 
-for filename in os.listdir(data_dir):
-    if filename.endswith('.json'):
-        try:
-            with open(os.path.join(data_dir, filename), encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, list):  # Ensure it's a list before extending
-                    questions.extend(data)
-                else:
-                    print(f"⚠️ Warning: {filename} does not contain a list of questions.")
-        except json.JSONDecodeError as e:
-            print(f"❌ Error decoding {filename}: {e}")
-        except FileNotFoundError as e:
-            print(f"❌ File not found: {filename} - {e}")
-        except Exception as e:
-            print(f"❌ Unexpected error loading {filename}: {e}")
+def load_questions():
+    global questions
+    questions = []  # Reset the list to avoid duplicates
 
-print(f"✅ {len(questions)} questions loaded from the data directory.")
+    for filename in os.listdir(data_dir):
+        if filename.endswith('.json'):
+            try:
+                with open(os.path.join(data_dir, filename), encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        questions.extend(data)
+                    else:
+                        print(f"⚠️ Warning: {filename} does not contain a list of questions.")
+            except json.JSONDecodeError as e:
+                print(f"❌ Error decoding {filename}: {e}")
+            except FileNotFoundError as e:
+                print(f"❌ File not found: {filename} - {e}")
+            except Exception as e:
+                print(f"❌ Unexpected error loading {filename}: {e}")
+
+    print(f"✅ {len(questions)} questions loaded from the data directory.")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 FastAPI is starting... Loading questions in the background.")
+    load_questions()  # Run it synchronously so that it completes before API calls
+    yield  # This ensures FastAPI starts after questions are loaded
+
+fastapi_app = FastAPI(lifespan=lifespan)
+
+# Enable CORS to allow frontend requests
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5000"],  # Only allow requests from the frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 
 @fastapi_app.get("/api/question")
