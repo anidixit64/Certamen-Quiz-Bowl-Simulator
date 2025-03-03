@@ -8,6 +8,8 @@ import os
 import json
 import random
 import threading
+import signal
+import sys
 
 # Create Flask and FastAPI instances
 flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -68,7 +70,6 @@ fastapi_app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-
 @fastapi_app.get("/api/question")
 async def get_random_question_fastapi():
     if not questions:
@@ -117,13 +118,20 @@ def run_flask():
 def run_fastapi():
     uvicorn.run(fastapi_app, host="127.0.0.1", port=8000)
 
-if __name__ == '__main__':
-    flask_thread = threading.Thread(target=run_flask)
-    fastapi_thread = threading.Thread(target=run_fastapi)
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+fastapi_thread = threading.Thread(target=run_fastapi, daemon=True)
 
-    flask_thread.start()
-    fastapi_thread.start()
+flask_thread.start()
+fastapi_thread.start()
 
-    flask_thread.join()
-    fastapi_thread.join()
+# Gracefully handle shutdown when CTRL+C is pressed
+def shutdown_server(sig, frame):
+    print("\n🛑 Shutting down servers...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, shutdown_server)
+
+# Keep the main thread alive until interrupted
+flask_thread.join()
+fastapi_thread.join()
 
