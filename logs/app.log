@@ -1,0 +1,7 @@
+2025-03-03 15:48:38.332 | INFO     | __main__:load_questions:63 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 15:48:46.813 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 15:49:24.796 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 15:49:43.117 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 15:50:18.087 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 15:50:19.757 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 15:50:58.723 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question

@@ -10,6 +10,14 @@ import random
 import threading
 import signal
 import sys
+from loguru import logger
+
+# Configure logging
+logger.remove()  # Remove default logger
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
+logger.add("logs/app.log", rotation="1 MB", level="INFO", retention="10 days")
+
 
 # Create Flask and FastAPI instances
 flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
@@ -43,15 +51,17 @@ def load_questions():
                     if isinstance(data, list):
                         questions.extend(data)
                     else:
-                        print(f"⚠️ Warning: {filename} does not contain a list of questions.")
+                        logger.warning(f"⚠️ Warning: {filename} does not contain a list of questions.")
             except json.JSONDecodeError as e:
-                print(f"❌ Error decoding {filename}: {e}")
+                logger.error(f"❌ Error decoding {filename}: {e}")
             except FileNotFoundError as e:
-                print(f"❌ File not found: {filename} - {e}")
+                logger.error(f"❌ File not found: {filename} - {e}")
             except Exception as e:
-                print(f"❌ Unexpected error loading {filename}: {e}")
+                logger.error(f"❌ Unexpected error loading {filename}: {e}")
 
-    print(f"✅ {len(questions)} questions loaded from the data directory.")
+
+    logger.info(f"✅ {len(questions)} questions loaded from the data directory.")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -72,14 +82,13 @@ fastapi_app.add_middleware(
 
 @fastapi_app.get("/api/question")
 async def get_random_question_fastapi():
+    logger.info("📡 Received request: /api/question")
+    
     if not questions:
+        logger.warning("⚠️ No questions available!")
         return JSONResponse(content={"error": "No questions available"}, status_code=500)
 
     question = random.choice(questions)
-
-    if "question_sanitized" not in question or "answer_sanitized" not in question:
-        return JSONResponse(content={"error": "Invalid question format"}, status_code=500)
-
     return {
         "question": question.get('question_sanitized', 'Question not found'),
         "answer": question.get('answer_sanitized', 'Answer not found'),
