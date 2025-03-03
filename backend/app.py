@@ -65,7 +65,7 @@ def get_random_question_fastapi():
     return {
         "question": question.get('question_sanitized', 'Question not found'),
         "answer": question.get('answer_sanitized', 'Answer not found'),
-        "original": question.get('answer', 'Original answer not found')
+        "original": question.get('answer', 'Original answer not found'),
         "subcategory": question.get('subcategory', 'Subcategory not found'),
         "category": question.get('category', 'Category not found'),
         "tournament": question.get('tournament', 'Tournament answer not found')
