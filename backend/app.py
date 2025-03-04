@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -11,6 +11,41 @@ import threading
 import signal
 import sys
 from loguru import logger
+from sqlalchemy import create_engine, Column, Integer, String, Text
+from sqlalchemy.sql import func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+
+# PostgreSQL Connection URL
+DATABASE_URL = "postgresql://certamen_user:hortumetbiblio@localhost/certamen_db"
+
+# Create database engine
+engine = create_engine(DATABASE_URL)
+
+# Create session factory
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Define Base for ORM models
+Base = declarative_base()
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    original = Column(Text)
+    category = Column(String)
+    subcategory = Column(String)
+    tournament = Column(String)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 # Configure logging
 logger.remove()  # Remove default logger
@@ -81,21 +116,23 @@ fastapi_app.add_middleware(
 )
 
 @fastapi_app.get("/api/question")
-async def get_random_question_fastapi():
+async def get_random_question_fastapi(db: Session = Depends(get_db)):
     logger.info("📡 Received request: /api/question")
-    
-    if not questions:
-        logger.warning("⚠️ No questions available!")
+
+    # Fetch a random question from PostgreSQL
+    question = db.query(Question).order_by(func.random()).first()
+
+    if not question:
+        logger.warning("⚠️ No questions available in the database!")
         return JSONResponse(content={"error": "No questions available"}, status_code=500)
 
-    question = random.choice(questions)
     return {
-        "question": question.get('question_sanitized', 'Question not found'),
-        "answer": question.get('answer_sanitized', 'Answer not found'),
-        "original": question.get('answer', 'Original answer not found'),
-        "subcategory": question.get('subcategory', 'Subcategory not found'),
-        "category": question.get('category', 'Category not found'),
-        "tournament": question.get('tournament', 'Tournament answer not found')
+        "question": question.sanitized_question,
+        "answer": question.sanitized_answer,
+        "original": question.answer,
+        "category": question.category,
+        "subcategory": question.subcategory,
+        "tournament": question.tournament,
     }
 
 @flask_app.route('/')

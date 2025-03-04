@@ -5,3 +5,9 @@
 2025-03-03 15:50:18.087 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
 2025-03-03 15:50:19.757 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
 2025-03-03 15:50:58.723 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 19:52:42.647 | INFO     | __main__:load_questions:97 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 19:52:49.950 | INFO     | __main__:get_random_question_fastapi:119 - 📡 Received request: /api/question
+2025-03-03 19:52:51.786 | INFO     | __main__:get_random_question_fastapi:119 - 📡 Received request: /api/question
+2025-03-03 19:57:02.891 | INFO     | __main__:load_questions:98 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 19:57:10.424 | INFO     | __main__:get_random_question_fastapi:120 - 📡 Received request: /api/question
+2025-03-03 19:57:10.659 | WARNING  | __main__:get_random_question_fastapi:126 - ⚠️ No questions available in the database!
