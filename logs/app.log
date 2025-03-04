@@ -11,3 +11,7 @@
 2025-03-03 19:57:02.891 | INFO     | __main__:load_questions:98 - ✅ 156853 questions loaded from the data directory.
 2025-03-03 19:57:10.424 | INFO     | __main__:get_random_question_fastapi:120 - 📡 Received request: /api/question
 2025-03-03 19:57:10.659 | WARNING  | __main__:get_random_question_fastapi:126 - ⚠️ No questions available in the database!
+2025-03-03 20:52:19.473 | INFO     | backend.app:load_questions:98 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 20:52:59.919 | INFO     | app:load_questions:98 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 20:53:37.711 | INFO     | app:get_random_question_fastapi:120 - 📡 Received request: /api/question
+2025-03-03 20:53:37.817 | WARNING  | app:get_random_question_fastapi:126 - ⚠️ No questions available in the database!

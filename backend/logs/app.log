@@ -1,2 +1,24 @@
 2025-03-03 15:46:59.316 | INFO     | __main__:load_questions:63 - ✅ 156853 questions loaded from the data directory.
 2025-03-03 15:47:20.296 | INFO     | __main__:get_random_question_fastapi:85 - 📡 Received request: /api/question
+2025-03-03 20:56:17.122 | INFO     | app:load_questions:98 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 21:26:59.464 | INFO     | __main__:load_questions:75 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 21:27:03.881 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:05.324 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:05.841 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:06.046 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:06.200 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:06.352 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:06.506 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:27:07.009 | INFO     | __main__:get_random_question_fastapi:97 - 📡 Received request: /api/question
+2025-03-03 21:33:20.071 | INFO     | __main__:load_questions:76 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 21:33:27.023 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:34:38.664 | INFO     | __main__:load_questions:76 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 21:36:05.708 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:08.610 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:10.179 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:11.323 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:22.212 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:23.803 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:25.415 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:26.854 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 21:36:57.454 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
