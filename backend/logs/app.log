@@ -22,3 +22,38 @@
 2025-03-03 21:36:25.415 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
 2025-03-03 21:36:26.854 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
 2025-03-03 21:36:57.454 | INFO     | __main__:get_random_question_fastapi:98 - 📡 Received request: /api/question
+2025-03-03 22:37:32.532 | INFO     | __main__:load_questions:79 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 22:37:36.182 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:37:58.870 | INFO     | __main__:load_questions:79 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 22:38:39.511 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:38:40.171 | INFO     | __main__:get_random_question_fastapi:128 - 📝 Cached question in Redis
+2025-03-03 22:38:41.951 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:38:41.951 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:38:43.349 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:38:43.350 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:39:00.297 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:39:00.299 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:39:08.188 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:39:08.189 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:40:41.683 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:40:42.001 | INFO     | __main__:get_random_question_fastapi:128 - 📝 Cached question in Redis
+2025-03-03 22:41:25.773 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:41:25.775 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:41:28.925 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:41:28.926 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:41:30.984 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:41:30.985 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:41:32.577 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:41:32.578 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:44:48.745 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:44:49.124 | INFO     | __main__:get_random_question_fastapi:128 - 📝 Cached question in Redis
+2025-03-03 22:44:50.572 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:44:50.573 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:44:52.046 | INFO     | __main__:get_random_question_fastapi:101 - 📡 Received request: /api/question
+2025-03-03 22:44:52.047 | INFO     | __main__:get_random_question_fastapi:106 - ⚡ Serving question from Redis cache
+2025-03-03 22:45:04.217 | INFO     | __main__:load_questions:79 - ✅ 156853 questions loaded from the data directory.
+2025-03-03 22:45:46.880 | INFO     | __main__:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-03 22:45:49.543 | INFO     | __main__:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-03 22:45:51.407 | INFO     | __main__:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-03 22:45:52.850 | INFO     | __main__:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-03 22:46:07.494 | INFO     | __main__:get_random_question_fastapi:102 - 📡 Received request: /api/question

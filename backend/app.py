@@ -14,8 +14,11 @@ import threading
 import signal
 import sys
 from loguru import logger
+import redis
 
-
+# Connect to Redis
+redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+CACHE_EXPIRATION = 60  # Cache questions for 60 seconds
 
 def get_db():
     db = SessionLocal()
@@ -93,11 +96,12 @@ fastapi_app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+
 @fastapi_app.get("/api/question")
 async def get_random_question_fastapi(db: Session = Depends(get_db)):
     logger.info("📡 Received request: /api/question")
 
-    # Fetch a random question from PostgreSQL
+    # Fetch a truly random question from PostgreSQL
     question = db.query(Question).order_by(func.random()).first()
 
     if not question:
@@ -112,6 +116,7 @@ async def get_random_question_fastapi(db: Session = Depends(get_db)):
         "subcategory": question.subcategory,
         "tournament": question.tournament,
     }
+
 
 @flask_app.route('/')
 def serve_welcome():
