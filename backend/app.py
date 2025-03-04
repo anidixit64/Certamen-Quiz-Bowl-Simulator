@@ -100,32 +100,37 @@ fastapi_app.add_middleware(
 @fastapi_app.get("/api/question")
 async def get_random_question_fastapi(db: Session = Depends(get_db)):
     logger.info("📡 Received request: /api/question")
+    
+    try:
+        # Fetch total questions count
+        total_questions = db.query(Question).count()
+        
+        if total_questions == 0:
+            logger.warning("⚠️ No questions available in the database!")
+            return JSONResponse(content={"error": "No questions available"}, status_code=500)
+        
+        # Generate a random ID and fetch the corresponding question
+        random_id = random.randint(1, total_questions)
+        question = db.query(Question).filter(Question.id == random_id).first()
 
-    # Fetch the total number of questions in the database
-    total_questions = db.query(Question).count()
+        if not question:
+            logger.warning("⚠️ No question found with id %d", random_id)
+            return JSONResponse(content={"error": "No question found"}, status_code=500)
+        
+        # If everything is fine, return the question data
+        return {
+            "question": question.question,
+            "answer": question.answer,
+            "original": question.original,
+            "category": question.category,
+            "subcategory": question.subcategory,
+            "tournament": question.tournament,
+        }
+    
+    except Exception as e:
+        logger.error(f"❌ Error occurred while fetching the question: {e}")
+        return JSONResponse(content={"error": "Error loading question. Please try again."}, status_code=500)
 
-    if total_questions == 0:
-        logger.warning("⚠️ No questions available in the database!")
-        return JSONResponse(content={"error": "No questions available"}, status_code=500)
-
-    # Generate a random id between 1 and the total number of questions
-    random_id = random.randint(1, total_questions)
-
-    # Fetch the random question by id
-    question = db.query(Question).filter(Question.id == random_id).first()
-
-    if not question:
-        logger.warning("⚠️ No question found with id %d", random_id)
-        return JSONResponse(content={"error": "Question not found"}, status_code=500)
-
-    return {
-        "question": question.question,
-        "answer": question.answer,
-        "original": question.original,
-        "category": question.category,
-        "subcategory": question.subcategory,
-        "tournament": question.tournament,
-    }
 
 @flask_app.route('/')
 def serve_welcome():

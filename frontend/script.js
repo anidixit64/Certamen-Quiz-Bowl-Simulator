@@ -138,7 +138,7 @@ function displayQuestionWordByWord() {
             readingFinished = true;
             startPostReadTimer();
         }
-    }, 200);
+    }, 150);
 }
 
 
