@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================================
 async function fetchQuestion() {
     // Reset all states for a fresh question
+
     clearInterval(intervalId);
     clearInterval(questionTimer);
     clearInterval(spacebarTimer);
@@ -80,7 +81,7 @@ async function fetchQuestion() {
     answerInput.value = '';
 
     // Clear old question text
-    questionElement.innerHTML = 'Loading question...';
+    questionElement.innerHTML = '';
     nextBtnContainer.style.display = 'block';
 
     try {
@@ -108,13 +109,15 @@ async function fetchQuestion() {
 
         // Split question text into words
         words = data.question.split(' ');
-        questionElement.innerHTML = '';
+        questionElement.innerHTML = '';  // Clear old question text
+
         displayQuestionWordByWord();
     } catch (error) {
         console.error("Error fetching question:", error);
         questionElement.innerHTML = "⚠️ Error loading question. Please try again.";
     }
 }
+
 
 
 // =============================================================
@@ -137,6 +140,7 @@ function displayQuestionWordByWord() {
         }
     }, 200);
 }
+
 
 // =============================================================
 // START THE 10-SECOND "POST-READ" TIMER
