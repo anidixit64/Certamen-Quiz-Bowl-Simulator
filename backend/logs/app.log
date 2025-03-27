@@ -182,3 +182,15 @@
 2025-03-27 10:50:29.349 | INFO     | __main__:load_questions:79 - ✅ 156853 questions loaded from the data directory.
 2025-03-27 10:52:18.871 | INFO     | __main__:load_questions:79 - ✅ 156853 questions loaded from the data directory.
 >>>>>>> 40347a9 (Removed unnecessary commits)
+2025-03-27 11:11:48.779 | INFO     | app:load_questions:79 - ✅ 156853 questions loaded from the data directory.
+2025-03-27 11:11:57.753 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:00.763 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:01.956 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:03.986 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:04.102 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:04.217 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:04.330 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:04.450 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:07.581 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:08.682 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
+2025-03-27 11:12:09.770 | INFO     | app:get_random_question_fastapi:102 - 📡 Received request: /api/question
