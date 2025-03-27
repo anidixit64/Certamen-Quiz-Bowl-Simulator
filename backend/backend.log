@@ -1,0 +1,11 @@
+ * Serving Flask app 'app' (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+INFO:     Started server process [89151]
+INFO:     Waiting for application startup.
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2025-03-27T10:44:29.935238-0400 INFO ✅ 156853 questions loaded from the data directory.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)

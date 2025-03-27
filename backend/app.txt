@@ -1,0 +1,342 @@
+from flask import Flask, jsonify, request, send_from_directory
+from fastapi import FastAPI, Depends
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from database import SessionLocal, Question
+from contextlib import asynccontextmanager
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+import uvicorn
+import os
+import json
+import random
+import threading
+import signal
+import sys
+from loguru import logger
+import redis
+
+# Connect to Redis
+redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+CACHE_EXPIRATION = 60  # Cache questions for 60 seconds
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# Configure logging
+logger.remove()  # Remove default logger
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
+logger.add("logs/app.log", rotation="1 MB", level="INFO", retention="10 days")
+
+
+# Create Flask and FastAPI instances
+flask_app = Flask(__name__, static_folder='../frontend', static_url_path='/')
+fastapi_app = FastAPI()
+
+# Enable CORS so the frontend can communicate with FastAPI
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow requests from any origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
+
+# Load all questions from JSON files in the data directory
+from fastapi import BackgroundTasks
+
+questions = []
+data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+
+def load_questions():
+    global questions
+    questions = []  # Reset the list to avoid duplicates
+
+    for filename in os.listdir(data_dir):
+        if filename.endswith('.json'):
+            try:
+                with open(os.path.join(data_dir, filename), encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        questions.extend(data)
+                    else:
+                        logger.warning(f"⚠️ Warning: {filename} does not contain a list of questions.")
+            except json.JSONDecodeError as e:
+                logger.error(f"❌ Error decoding {filename}: {e}")
+            except FileNotFoundError as e:
+                logger.error(f"❌ File not found: {filename} - {e}")
+            except Exception as e:
+                logger.error(f"❌ Unexpected error loading {filename}: {e}")
+
+
+    logger.info(f"✅ {len(questions)} questions loaded from the data directory.")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 FastAPI is starting... Loading questions in the background.")
+    load_questions()  # Run it synchronously so that it completes before API calls
+    yield  # This ensures FastAPI starts after questions are loaded
+
+fastapi_app = FastAPI(lifespan=lifespan)
+
+# Enable CORS to allow frontend requests
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5000"],  # Only allow requests from the frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
+
+@fastapi_app.get("/api/question")
+async def get_random_question_fastapi(db: Session = Depends(get_db)):
+    logger.info("📡 Received request: /api/question")
+    
+    try:
+        # Fetch total questions count
+        total_questions = db.query(Question).count()
+        
+        if total_questions == 0:
+            logger.warning("⚠️ No questions available in the database!")
+            return JSONResponse(content={"error": "No questions available"}, status_code=500)
+        
+        # Generate a random ID and fetch the corresponding question
+        random_id = random.randint(1, total_questions)
+        question = db.query(Question).filter(Question.id == random_id).first()
+
+        if not question:
+            logger.warning("⚠️ No question found with id %d", random_id)
+            return JSONResponse(content={"error": "No question found"}, status_code=500)
+        
+        # If everything is fine, return the question data
+        return {
+            "question": question.question,
+            "answer": question.answer,
+            "original": question.original,
+            "category": question.category,
+            "subcategory": question.subcategory,
+            "tournament": question.tournament,
+        }
+    
+    except Exception as e:
+        logger.error(f"❌ Error occurred while fetching the question: {e}")
+        return JSONResponse(content={"error": "Error loading question. Please try again."}, status_code=500)
+
+
+@flask_app.route('/')
+def serve_welcome():
+    # Serve the welcome page
+    return send_from_directory('../frontend', 'welcome.html')
+
+@flask_app.route('/questions')
+def serve_questions():
+    # Serve the main question page when accessing /questions
+    return send_from_directory('../frontend', 'index.html')
+
+@fastapi_app.get("/api")
+async def api_info_fastapi():
+    return {
+        "endpoints": {
+            "/api/question": "Get a random sanitized question"
+        }
+    }
+
+@fastapi_app.get("/api/fastapi_test")
+def fastapi_test():
+    return {"message": "FastAPI is working alongside Flask!"}
+
+def run_flask():
+    debug_mode = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
+    flask_app.run(debug=debug_mode, port=5000, use_reloader=False)
+
+def run_fastapi():
+    uvicorn.run(fastapi_app, host="127.0.0.1", port=8000)
+
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+fastapi_thread = threading.Thread(target=run_fastapi, daemon=True)
+
+flask_thread.start()
+fastapi_thread.start()
+
+# Gracefully handle shutdown when CTRL+C is pressed
+def shutdown_server(sig, frame):
+    print("\n🛑 Shutting down servers...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, shutdown_server)
+
+# Keep the main thread alive until interrupted
+flask_thread.join()
+fastapi_thread.join()
+
+
+
+
+
+# Quiz Bowl Application - Certamen
+
+## Overview
+The **Quiz Bowl Application - Certamen** is a **full-stack web application** designed for interactive Quiz Bowl competitions. It features a **Flask** backend, a **JavaScript-powered** frontend, and a robust **RESTful API** for serving and managing quiz questions. The project is built to enhance quiz-based learning by delivering questions dynamically and validating user answers in real-time.
+
+## Project Goals
+- Develop a **scalable full-stack application** for Quiz Bowl competitions.
+- Implement a **RESTful API** to efficiently manage a dataset of **156,888 questions**.
+- Ensure a **smooth user experience** with a dynamic **JavaScript frontend** and real-time **question validation**.
+- Utilize **Flask** for the backend, serving quiz questions and handling logic.
+- Enhance answer validation with **Levenshtein distance matching**.
+- Provide an intuitive **UI/UX** with **progressive question rendering**.
+
+---
+
+## Tech Stack
+| Layer         | Technologies Used |
+|--------------|-----------------|
+| **Frontend** | HTML, CSS, JavaScript |
+| **Backend**  | Flask (Python) |
+| **Database** | JSON-based dataset (156,888 questions) |
+| **Styling**  | CSS with Google Fonts (Merriweather) |
+| **API**      | RESTful API with Flask routes |
+
+---
+
+## Project Structure
+```
+quizbowl/
+├── backend/
+│   ├── app.py              # Flask application (API & routes)
+│   ├── requirements.txt    # Python dependencies
+│   ├── data/
+│   │   ├── tossups_1.json  # Quiz questions dataset
+│   │   ├── ...             # Additional JSON files
+├── frontend/
+│   ├── index.html          # Main UI for questions
+│   ├── welcome.html        # Welcome screen
+│   ├── style.css           # Styling for UI elements
+│   ├── script.js           # Core logic for fetching and displaying questions
+│   ├── utility.js          # Answer validation utilities (Levenshtein distance)
+│
+└── README.md               # Project documentation
+```
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+Ensure you have the following installed:
+- **Python (3.x)**
+- **pip**
+- **Node.js (for frontend development)**
+
+### 1. Clone the Repository
+```sh
+git clone https://github.com/yourusername/quizbowl.git
+cd quizbowl
+```
+
+### 2. Install Backend Dependencies
+```sh
+cd backend
+pip install -r requirements.txt
+```
+
+### 3. Run the Flask Server
+```sh
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run
+```
+This starts the server at `http://127.0.0.1:5000/`.
+
+### 4. Serve the Frontend
+Simply open `frontend/index.html` in a browser or use:
+```sh
+python -m http.server 8080
+```
+Then, visit `http://localhost:8080/`.
+
+---
+
+## API Endpoints
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| **GET** | `/api/question` | Fetch a random Quiz Bowl question |
+| **GET** | `/api` | View API details |
+
+Example API Response:
+```json
+{
+  "question": "Who wrote *1984*?",
+  "answer": "George Orwell",
+  "original": "Orwell, George"
+}
+```
+
+---
+
+## Features
+### Backend (Flask API)
+- Loads **156,888 questions** from multiple JSON files.
+- Provides **randomized question delivery** via `/api/question`.
+- Implements **error handling** for missing or malformed datasets.
+
+### Frontend (JavaScript, HTML, CSS)
+- Dynamically fetches questions from the API.
+- Displays questions **word-by-word** for a suspenseful effect.
+- Allows **real-time answer input**.
+- Validates answers using **Levenshtein distance matching**.
+- Implements **spacebar-triggered timers** and **auto-answer submission**.
+
+---
+
+## How It Works
+### 1. **Fetching Questions**
+- The frontend fetches a random question via `/api/question`.
+- The response is processed and displayed word-by-word.
+
+### 2. **Answer Validation**
+- The user submits an answer.
+- The answer is normalized using **text sanitization** (`normalizeText` in `utility.js`).
+- The Levenshtein distance function (`levenshtein()`) determines if the answer is **approximately correct**.
+
+### 3. **Scoring & UI Effects**
+- Correct answers trigger a **green success message**.
+- Incorrect answers display a **red error message**.
+- A countdown timer enforces **quick thinking**.
+
+---
+
+## Expected Outcomes
+- **Faster response times** (~50ms per request) due to optimized API handling.
+- **Improved engagement** with progressive word-by-word question display.
+- **Higher answer accuracy** using **fuzzy matching (Levenshtein distance)**.
+- **Enhanced user experience** with keyboard shortcuts and visual timers.
+
+---
+
+## Future Enhancements
+- **Leaderboards**: Track player scores over multiple rounds.
+- **Question Categorization**: Allow filtering by difficulty and topic.
+- **Multiplayer Mode**: Implement live Quiz Bowl sessions.
+- **Database Migration**: Move from JSON to PostgreSQL for better scalability.
+
+---
+
+## Contributors
+- **Your Name** - Developer
+- **Other Contributors** - Feel free to add contributors
+
+---
+
+## License
+This project is licensed under the **MIT License**.
+
